@@ -330,4 +330,9 @@ async function aggregate() {
   };
 }
 
-module.exports = { aggregate };
+module.exports = {
+  aggregate,
+  // exported for unit tests
+  slugify, decodeEntities, truncate, looksLikeBreach,
+  parseFeed, computeAdvice, computeFaq, clusterNews,
+};

@@ -4,9 +4,11 @@
     "api/render.js": { "maxDuration": 15 },
     "api/feed.js": { "maxDuration": 15 },
     "api/sitemap.js": { "maxDuration": 15 },
-    "api/rss.js": { "maxDuration": 15 },
-    "api/og.js": { "maxDuration": 15 }
+    "api/rss.js": { "maxDuration": 15 }
   },
+  "crons": [
+    { "path": "/api/feed", "schedule": "0 * * * *" }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/api/render" },
     { "source": "/breach/:id", "destination": "/api/render?id=:id" },
@@ -14,6 +16,7 @@
     { "source": "/stats", "destination": "/api/render?view=stats" },
     { "source": "/about", "destination": "/api/render?view=about" },
     { "source": "/methodology", "destination": "/api/render?view=methodology" },
+    { "source": "/how-its-built", "destination": "/api/render?view=built" },
     { "source": "/biggest-data-breaches", "destination": "/api/render?view=biggest" },
     { "source": "/company/:slug", "destination": "/api/render?company=:slug" },
     { "source": "/glossary", "destination": "/api/render?view=glossary" },

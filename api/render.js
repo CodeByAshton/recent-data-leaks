@@ -225,13 +225,37 @@ function glossaryTermMain(g) {
   return `<a class="back" href="/glossary">&larr; All terms</a><section class="hero"><h1>${esc(g.term)}</h1></section><div class="prose"><p>${esc(g.body)}</p><p><a href="/glossary">Back to the glossary</a> or <a href="/">browse recent data breaches</a>.</p></div>`;
 }
 
+function builtMain(feed) {
+  return `<a class="back" href="/">&larr; Back to timeline</a>
+<section class="hero"><h1>How this site is built</h1><p>The engineering behind a live, server-rendered breach timeline.</p></section>
+<div class="prose">
+<p>Recent Data Leaks is a server-rendered site with no front-end framework and one runtime dependency. It currently tracks ${feed.count} incidents and refreshes continuously.</p>
+<h2>Stack</h2>
+<ul>
+<li><b>Vercel</b> serverless and edge functions, no build step.</li>
+<li><b>Vanilla JavaScript</b> for both the server renderer and the client. The pages are server-rendered for SEO, then hydrated for filtering, search, and navigation.</li>
+<li><b>Dependency-free aggregation.</b> Sources are fetched server-side and parsed with hand-written RSS handling, so there is no CORS problem and no parser library.</li>
+</ul>
+<h2>How a request is served</h2>
+<ul>
+<li><b>Pages</b> (<code>/</code>, <code>/breach/:slug</code>, archives) render full HTML in a serverless function with per-page title, meta, Open Graph, and JSON-LD. Vercel's CDN caches the result for ~15 minutes.</li>
+<li><b>The feed</b> (<code>/api/feed</code>) aggregates Have I Been Pwned plus five security news feeds, dedupes and clusters them, and returns a light recent window for the client.</li>
+<li><b>OG images</b> (<code>/api/og</code>) are generated as PNGs at the edge, per breach, so shared links show a real preview.</li>
+<li><b>A bundled snapshot</b> serves as a fallback so a page never renders blank if a source is down.</li>
+</ul>
+<h2>SEO surface</h2>
+<p>Every breach is its own indexable page with original "what to do" guidance and an FAQ. Year archives, per-company hubs, a statistics page, and a glossary add depth, all cross-linked and listed in a dynamic sitemap.</p>
+<p>The source is on <a href="https://github.com/CodeByAshton/recent-data-leaks" target="_blank" rel="noopener">GitHub</a>.</p>
+</div>`;
+}
+
 // ---------- document ----------
 function page({ title, description, canonical, robots, ogType, image, jsonld, main }) {
   const verify = [
     process.env.GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${esc(process.env.GOOGLE_SITE_VERIFICATION)}" />` : "",
     process.env.BING_SITE_VERIFICATION ? `<meta name="msvalidate.01" content="${esc(process.env.BING_SITE_VERIFICATION)}" />` : "",
   ].join("");
-  const img = image || `${SITE}/assets/og.svg`;
+  const img = image || `${SITE}/api/og`;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -265,7 +289,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <a class="skip" href="#app">Skip to content</a>
 <header class="topbar"><div class="wrap"><a class="brand" href="/">${BRAND}</a><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
 <main class="wrap" id="app">${main}</main>
-<footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
+<footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/how-its-built">How it&#39;s built</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/assets/app.js"></script>
 </body>
@@ -447,6 +471,13 @@ module.exports = async function handler(req, res) {
       description: "How Recent Data Leaks collects and normalizes breach data: its sources, refresh cadence, news filtering, and limitations.",
       canonical: `${SITE}/methodology`,
       main: methodologyMain(feed),
+    });
+  } else if (view === "built") {
+    html = page({
+      title: `How this site is built — ${NAME}`,
+      description: "The engineering behind Recent Data Leaks: server-rendered vanilla JS on Vercel, dependency-free multi-source aggregation, and edge-generated OG images.",
+      canonical: `${SITE}/how-its-built`,
+      main: builtMain(feed),
     });
   } else {
     const ld = jsonLd({

@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Syntax check (CommonJS)
+        run: |
+          for f in api/_aggregate.js api/_feed.js api/_content.js api/render.js api/feed.js api/sitemap.js api/rss.js assets/app.js; do node --check "$f"; done
+      - name: Syntax check (ESM edge function)
+        run: node -e "import('./api/og.js').then(()=>console.log('og.js ok'))"
+      - name: Unit tests
+        run: node --test

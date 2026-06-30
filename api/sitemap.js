@@ -20,6 +20,7 @@ module.exports = async function handler(req, res) {
     ...GLOSSARY.map((g) => `  <url><loc>${SITE}/glossary/${g.slug}</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`),
     `  <url><loc>${SITE}/about</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
     `  <url><loc>${SITE}/methodology</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
+    `  <url><loc>${SITE}/how-its-built</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
     ...years.map((y) => `  <url><loc>${SITE}/year/${y}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>`),
     ...companies.map((c) => `  <url><loc>${SITE}/company/${c}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`),
     ...feed.items.map((it) => {
