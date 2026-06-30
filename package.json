@@ -1,0 +1,13 @@
+{
+  "name": "breach-feed",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Live timeline of public data breaches, aggregated from multiple sources.",
+  "scripts": {
+    "seed": "node -e \"require('./api/_aggregate').aggregate().then(f=>require('fs').writeFileSync('data/feed.json', JSON.stringify(f,null,2)+'\\n')).then(()=>console.log('seeded data/feed.json'))\"",
+    "dev": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

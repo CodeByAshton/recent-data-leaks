@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/render.js": { "maxDuration": 15 },
+    "api/feed.js": { "maxDuration": 15 },
+    "api/sitemap.js": { "maxDuration": 15 }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api/render" },
+    { "source": "/breach/:id", "destination": "/api/render?id=:id" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
+  ]
+}
