@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-30T18:41:55.559Z",
+  "generatedAt": "2026-06-30T19:16:38.339Z",
   "count": 67,
   "sources": [
     "Have I Been Pwned",
@@ -25,7 +25,12 @@
       "tags": [],
       "domain": null,
       "logo": null,
-      "verified": true
+      "verified": true,
+      "slug": "aflac-japan-data-breach-impacts-4-38-million-2026",
+      "advice": [
+        "If you have an account with this organization, change your password and enable two-factor authentication.",
+        "Be cautious of phishing emails, calls, or texts that reference this incident."
+      ]
     },
     {
       "id": "c9ccdff41f195098",
@@ -41,7 +46,12 @@
       "tags": [],
       "domain": null,
       "logo": null,
-      "verified": true
+      "verified": true,
+      "slug": "insurance-giant-aflac-discloses-data-breach-after-subsidiary-2026",
+      "advice": [
+        "If you have an account with this organization, change your password and enable two-factor authentication.",
+        "Be cautious of phishing emails, calls, or texts that reference this incident."
+      ]
     },
     {
       "id": "e52e34df6d4c5543",
@@ -57,7 +67,12 @@
       "tags": [],
       "domain": null,
       "logo": null,
-      "verified": true
+      "verified": true,
+      "slug": "nissan-employee-data-breached-in-oracle-peoplesoft-hack-2026",
+      "advice": [
+        "If you have an account with this organization, change your password and enable two-factor authentication.",
+        "Be cautious of phishing emails, calls, or texts that reference this incident."
+      ]
     },
     {
       "id": "355f63deab701a97",
@@ -73,7 +88,12 @@
       "tags": [],
       "domain": null,
       "logo": null,
-      "verified": true
+      "verified": true,
+      "slug": "nissan-discloses-employee-data-breach-linked-to-oracle-2026",
+      "advice": [
+        "If you have an account with this organization, change your password and enable two-factor authentication.",
+        "Be cautious of phishing emails, calls, or texts that reference this incident."
+      ]
     },
     {
       "id": "f8372fde307143c8",
@@ -89,7 +109,12 @@
       "tags": [],
       "domain": null,
       "logo": null,
-      "verified": true
+      "verified": true,
+      "slug": "naic-says-public-data-stolen-in-shinyhunters-peoplesoft-2026",
+      "advice": [
+        "If you have an account with this organization, change your password and enable two-factor authentication.",
+        "Be cautious of phishing emails, calls, or texts that reference this incident."
+      ]
     },
     {
       "id": "25b42b35e7eb0aeb",
@@ -114,7 +139,13 @@
       ],
       "domain": "sysco.com",
       "logo": "https://logos.haveibeenpwned.com/Sysco.png",
-      "verified": true
+      "verified": true,
+      "slug": "sysco-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "2c1bb5f537749a43",
@@ -136,7 +167,13 @@
       ],
       "domain": "americantower.com",
       "logo": "https://logos.haveibeenpwned.com/AmericanTower.png",
-      "verified": true
+      "verified": true,
+      "slug": "americantower-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "f45edab7367c77cc",
@@ -158,7 +195,13 @@
       ],
       "domain": "msgsports.com",
       "logo": "https://logos.haveibeenpwned.com/MadisonSquareGardenSports.png",
-      "verified": true
+      "verified": true,
+      "slug": "msgsports-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "b52e24545611c356",
@@ -183,7 +226,14 @@
       ],
       "domain": "jcpenny.com",
       "logo": "https://logos.haveibeenpwned.com/JCPenney.png",
-      "verified": true
+      "verified": true,
+      "slug": "jcpenny-2026",
+      "advice": [
+        "Place a fraud alert or credit freeze with the major credit bureaus to block new accounts opened in your name.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "677345bec3955930",
@@ -205,7 +255,13 @@
       ],
       "domain": "ralphlauren.com",
       "logo": "https://logos.haveibeenpwned.com/RalphLauren.png",
-      "verified": true
+      "verified": true,
+      "slug": "ralphlauren-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "908fa82a56b3bc98",
@@ -224,7 +280,12 @@
       ],
       "domain": null,
       "logo": "https://logos.haveibeenpwned.com/List.png",
-      "verified": true
+      "verified": true,
+      "slug": "operation-endgame-4-0-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution."
+      ]
     },
     {
       "id": "e0f92162d3a7254c",
@@ -247,7 +308,13 @@
       ],
       "domain": "cfgi.com",
       "logo": "https://logos.haveibeenpwned.com/CFGI.png",
-      "verified": true
+      "verified": true,
+      "slug": "cfgi-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "fa4d1808f420d592",
@@ -266,7 +333,12 @@
       ],
       "domain": null,
       "logo": "https://logos.haveibeenpwned.com/List.png",
-      "verified": true
+      "verified": true,
+      "slug": "june-2026-stealer-logs-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution."
+      ]
     },
     {
       "id": "93e13eb964d91d1b",
@@ -288,7 +360,13 @@
       ],
       "domain": "berkadia.com",
       "logo": "https://logos.haveibeenpwned.com/Berkadia.png",
-      "verified": true
+      "verified": true,
+      "slug": "berkadia-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "c2b49eb48a363680",
@@ -313,7 +391,13 @@
       ],
       "domain": "infinitecampus.com",
       "logo": "https://logos.haveibeenpwned.com/InfiniteCampus.png",
-      "verified": true
+      "verified": true,
+      "slug": "infinitecampus-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "84045f31bf6d2624",
@@ -345,7 +429,14 @@
       ],
       "domain": "nottingham.ac.uk",
       "logo": "https://logos.haveibeenpwned.com/UniversityOfNottingham.png",
-      "verified": true
+      "verified": true,
+      "slug": "nottingham-2026",
+      "advice": [
+        "Place a fraud alert or credit freeze with the major credit bureaus to block new accounts opened in your name.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "cdd201738e5c4ed3",
@@ -367,7 +458,13 @@
       ],
       "domain": "bakerdist.com",
       "logo": "https://logos.haveibeenpwned.com/BakerDistributing.png",
-      "verified": true
+      "verified": true,
+      "slug": "bakerdist-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "09670380e9e1844e",
@@ -391,7 +488,13 @@
       ],
       "domain": "bcdtravel.com",
       "logo": "https://logos.haveibeenpwned.com/BCDTravel.png",
-      "verified": true
+      "verified": true,
+      "slug": "bcdtravel-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "b5368ce059f81db1",
@@ -416,7 +519,14 @@
       ],
       "domain": "dentaquest.com",
       "logo": "https://logos.haveibeenpwned.com/DentaQuest.png",
-      "verified": true
+      "verified": true,
+      "slug": "dentaquest-2026",
+      "advice": [
+        "Place a fraud alert or credit freeze with the major credit bureaus to block new accounts opened in your name.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "95d953fb512a1f54",
@@ -439,7 +549,14 @@
       ],
       "domain": "edmunds.com",
       "logo": "https://logos.haveibeenpwned.com/Edmunds.png",
-      "verified": true
+      "verified": true,
+      "slug": "edmunds-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "f8b1286d698decbc",
@@ -461,7 +578,13 @@
       ],
       "domain": "atlasmenu.net",
       "logo": "https://logos.haveibeenpwned.com/AtlasMenu.png",
-      "verified": true
+      "verified": true,
+      "slug": "atlasmenu-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "f78c98fa380ec3fa",
@@ -483,7 +606,13 @@
       ],
       "domain": "charter.com",
       "logo": "https://logos.haveibeenpwned.com/Charter.png",
-      "verified": true
+      "verified": true,
+      "slug": "charter-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "f08b6b6413e02e0e",
@@ -506,7 +635,14 @@
       ],
       "domain": "kemper.com",
       "logo": "https://logos.haveibeenpwned.com/Kemper.png",
-      "verified": true
+      "verified": true,
+      "slug": "kemper-2026",
+      "advice": [
+        "Watch your card and bank statements for unfamiliar charges, and consider requesting a new card number.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "3923bf082d6d128c",
@@ -530,7 +666,14 @@
       ],
       "domain": "mytheresa.com",
       "logo": "https://logos.haveibeenpwned.com/Mytheresa.png",
-      "verified": true
+      "verified": true,
+      "slug": "mytheresa-2026",
+      "advice": [
+        "Watch your card and bank statements for unfamiliar charges, and consider requesting a new card number.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "1a714b9dcfa2765b",
@@ -554,7 +697,13 @@
       ],
       "domain": "ameriprise.com",
       "logo": "https://logos.haveibeenpwned.com/Ameriprise.png",
-      "verified": true
+      "verified": true,
+      "slug": "ameriprise-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "c9c28f0de2cc9450",
@@ -576,7 +725,13 @@
       ],
       "domain": "7-eleven.com",
       "logo": "https://logos.haveibeenpwned.com/7-Eleven.png",
-      "verified": true
+      "verified": true,
+      "slug": "7-eleven-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "2d61a8b93cd30483",
@@ -592,7 +747,12 @@
       "tags": [],
       "domain": null,
       "logo": null,
-      "verified": true
+      "verified": true,
+      "slug": "lawmakers-demand-answers-as-cisa-tries-to-contain-2026",
+      "advice": [
+        "If you have an account with this organization, change your password and enable two-factor authentication.",
+        "Be cautious of phishing emails, calls, or texts that reference this incident."
+      ]
     },
     {
       "id": "cc0cec462986838b",
@@ -615,7 +775,13 @@
       ],
       "domain": "playdragonica.eu",
       "logo": "https://logos.haveibeenpwned.com/Dragonica.png",
-      "verified": true
+      "verified": true,
+      "slug": "playdragonica-2025",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "757fb17487f7d1d1",
@@ -636,7 +802,13 @@
       ],
       "domain": "windows93.net",
       "logo": "https://logos.haveibeenpwned.com/Windows93.png",
-      "verified": true
+      "verified": true,
+      "slug": "windows93-2021",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "78ed17465b42ac98",
@@ -656,7 +828,13 @@
       ],
       "domain": "ctt.pt",
       "logo": "https://logos.haveibeenpwned.com/CTT.png",
-      "verified": true
+      "verified": true,
+      "slug": "ctt-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "38821ae68d40026e",
@@ -686,7 +864,14 @@
       ],
       "domain": "addi.com",
       "logo": "https://logos.haveibeenpwned.com/ADDI.png",
-      "verified": true
+      "verified": true,
+      "slug": "addi-2026",
+      "advice": [
+        "Place a fraud alert or credit freeze with the major credit bureaus to block new accounts opened in your name.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "9c40b753f737116f",
@@ -702,7 +887,12 @@
       "tags": [],
       "domain": null,
       "logo": null,
-      "verified": true
+      "verified": true,
+      "slug": "cisa-admin-leaked-aws-govcloud-keys-on-github-2026",
+      "advice": [
+        "If you have an account with this organization, change your password and enable two-factor authentication.",
+        "Be cautious of phishing emails, calls, or texts that reference this incident."
+      ]
     },
     {
       "id": "8b01879cd47b5729",
@@ -725,7 +915,13 @@
       ],
       "domain": "abrigo.com",
       "logo": "https://logos.haveibeenpwned.com/Abrigo.png",
-      "verified": true
+      "verified": true,
+      "slug": "abrigo-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "5081269f87c7bc6d",
@@ -749,7 +945,13 @@
       ],
       "domain": "canadalife.com",
       "logo": "https://logos.haveibeenpwned.com/CanadaLife.png",
-      "verified": true
+      "verified": true,
+      "slug": "canadalife-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "3fbe1f24c7863341",
@@ -772,7 +974,13 @@
       ],
       "domain": "cushmanwakefield.com",
       "logo": "https://logos.haveibeenpwned.com/CushmanWakefield.png",
-      "verified": true
+      "verified": true,
+      "slug": "cushmanwakefield-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "e2a1488dc8624855",
@@ -793,7 +1001,12 @@
       ],
       "domain": "zara.com",
       "logo": "https://logos.haveibeenpwned.com/Zara.png",
-      "verified": true
+      "verified": true,
+      "slug": "zara-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "32330dd02cac3191",
@@ -814,7 +1027,13 @@
       ],
       "domain": "woflow.com",
       "logo": "https://logos.haveibeenpwned.com/Woflow.png",
-      "verified": true
+      "verified": true,
+      "slug": "woflow-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "8120d33250724762",
@@ -835,7 +1054,13 @@
       ],
       "domain": "legionproxy.io",
       "logo": "https://logos.haveibeenpwned.com/LegionProxy.png",
-      "verified": true
+      "verified": true,
+      "slug": "legionproxy-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "0d7bae1f72a4850e",
@@ -854,7 +1079,12 @@
       ],
       "domain": "vimeo.com",
       "logo": "https://logos.haveibeenpwned.com/Vimeo.png",
-      "verified": true
+      "verified": true,
+      "slug": "vimeo-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "17a45aab3099b31a",
@@ -873,7 +1103,11 @@
       ],
       "domain": "reborngaming.net",
       "logo": "https://logos.haveibeenpwned.com/RebornGaming.png",
-      "verified": true
+      "verified": true,
+      "slug": "reborngaming-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution."
+      ]
     },
     {
       "id": "82ec2cc2e70da05c",
@@ -896,7 +1130,13 @@
       ],
       "domain": "marcusmillichap.com",
       "logo": "https://logos.haveibeenpwned.com/MarcusMillichap.png",
-      "verified": true
+      "verified": true,
+      "slug": "marcusmillichap-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "36d0eafcea4675ba",
@@ -916,7 +1156,13 @@
       ],
       "domain": "zenbusiness.com",
       "logo": "https://logos.haveibeenpwned.com/ZenBusiness.png",
-      "verified": true
+      "verified": true,
+      "slug": "zenbusiness-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "f7b55649a9899090",
@@ -943,7 +1189,13 @@
       ],
       "domain": "aman.com",
       "logo": "https://logos.haveibeenpwned.com/Aman.png",
-      "verified": true
+      "verified": true,
+      "slug": "aman-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "78cea1166749aea5",
@@ -965,7 +1217,13 @@
       ],
       "domain": "pitneybowes.com",
       "logo": "https://logos.haveibeenpwned.com/PitneyBowes.png",
-      "verified": true
+      "verified": true,
+      "slug": "pitneybowes-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "2992cda94c080e02",
@@ -988,7 +1246,14 @@
       ],
       "domain": "adt.com",
       "logo": "https://logos.haveibeenpwned.com/ADT.png",
-      "verified": true
+      "verified": true,
+      "slug": "adt-2026",
+      "advice": [
+        "Place a fraud alert or credit freeze with the major credit bureaus to block new accounts opened in your name.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "2df8ab0ff8bac3a6",
@@ -1012,7 +1277,14 @@
       ],
       "domain": "udemy.com",
       "logo": "https://logos.haveibeenpwned.com/Udemy.png",
-      "verified": true
+      "verified": true,
+      "slug": "udemy-2026",
+      "advice": [
+        "Watch your card and bank statements for unfamiliar charges, and consider requesting a new card number.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "4bb3de562f5921e3",
@@ -1036,7 +1308,12 @@
       ],
       "domain": "carnivalcorp.com",
       "logo": "https://logos.haveibeenpwned.com/Carnival.png",
-      "verified": true
+      "verified": true,
+      "slug": "carnivalcorp-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "61e3f253fa5ebedc",
@@ -1057,7 +1334,12 @@
       ],
       "domain": "amtrak.com",
       "logo": "https://logos.haveibeenpwned.com/Amtrak.png",
-      "verified": true
+      "verified": true,
+      "slug": "amtrak-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "d4b9cb7595400b6e",
@@ -1078,7 +1360,13 @@
       ],
       "domain": "mheducation.com",
       "logo": "https://logos.haveibeenpwned.com/McGrawHill.png",
-      "verified": true
+      "verified": true,
+      "slug": "mheducation-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "9fb06add560f91f9",
@@ -1100,7 +1388,13 @@
       ],
       "domain": "hallmark.com",
       "logo": "https://logos.haveibeenpwned.com/Hallmark.png",
-      "verified": true
+      "verified": true,
+      "slug": "hallmark-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "f348719ebea1ddb8",
@@ -1119,7 +1413,11 @@
       ],
       "domain": "mylovely.ai",
       "logo": "https://logos.haveibeenpwned.com/MyLovelyAI.png",
-      "verified": true
+      "verified": true,
+      "slug": "mylovely-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution."
+      ]
     },
     {
       "id": "20fc594212ba1a5f",
@@ -1137,7 +1435,11 @@
       ],
       "domain": "crunchyroll.com",
       "logo": "https://logos.haveibeenpwned.com/Crunchyroll.png",
-      "verified": true
+      "verified": true,
+      "slug": "crunchyroll-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution."
+      ]
     },
     {
       "id": "66371572022a57f1",
@@ -1160,7 +1462,13 @@
       ],
       "domain": "songtrivia2.io",
       "logo": "https://logos.haveibeenpwned.com/SongTrivia2.png",
-      "verified": true
+      "verified": true,
+      "slug": "songtrivia2-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "d897e15a6178f18d",
@@ -1185,7 +1493,14 @@
       ],
       "domain": "success.com",
       "logo": "https://logos.haveibeenpwned.com/SUCCESS.png",
-      "verified": true
+      "verified": true,
+      "slug": "success-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "a7a7032a9a4a80d6",
@@ -1205,7 +1520,12 @@
       ],
       "domain": "cuties.ai",
       "logo": "https://logos.haveibeenpwned.com/CutiesAI.png",
-      "verified": true
+      "verified": true,
+      "slug": "cuties-2025",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "ee9756393642cef1",
@@ -1225,7 +1545,13 @@
       ],
       "domain": "breachforums.bf",
       "logo": "https://logos.haveibeenpwned.com/BreachForums.png",
-      "verified": true
+      "verified": true,
+      "slug": "breachforums-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "ca6e3a9974b03c0e",
@@ -1247,7 +1573,13 @@
       ],
       "domain": "scufgaming.com",
       "logo": "https://logos.haveibeenpwned.com/ScufGaming.png",
-      "verified": true
+      "verified": true,
+      "slug": "scufgaming-2015",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "efaeaa2dbd9ce6d7",
@@ -1267,7 +1599,13 @@
       ],
       "domain": "soundradix.com",
       "logo": "https://logos.haveibeenpwned.com/SoundRadix.png",
-      "verified": true
+      "verified": true,
+      "slug": "soundradix-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "6da5c0fe385b255d",
@@ -1288,7 +1626,13 @@
       ],
       "domain": "rsboards.com",
       "logo": "https://logos.haveibeenpwned.com/RSBoards.png",
-      "verified": true
+      "verified": true,
+      "slug": "rsboards-2011",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "01729dce0e0e768e",
@@ -1311,7 +1655,13 @@
       ],
       "domain": "aura.com",
       "logo": "https://logos.haveibeenpwned.com/Aura.png",
-      "verified": true
+      "verified": true,
+      "slug": "aura-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "80d980a9dcb5de13",
@@ -1331,7 +1681,12 @@
       ],
       "domain": "divineskins.gg",
       "logo": "https://logos.haveibeenpwned.com/DivineSkins.png",
-      "verified": true
+      "verified": true,
+      "slug": "divineskins-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "0e52bdc62a7a688e",
@@ -1357,7 +1712,15 @@
       ],
       "domain": "baydoner.com",
       "logo": "https://logos.haveibeenpwned.com/Baydoner.png",
-      "verified": true
+      "verified": true,
+      "slug": "baydoner-2026",
+      "advice": [
+        "Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.",
+        "Place a fraud alert or credit freeze with the major credit bureaus to block new accounts opened in your name.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "ab0455b65f102cb8",
@@ -1376,7 +1739,12 @@
       ],
       "domain": "provecho.bio",
       "logo": "https://logos.haveibeenpwned.com/Provecho.png",
-      "verified": true
+      "verified": true,
+      "slug": "provecho-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "f178128c0ad818f9",
@@ -1396,7 +1764,12 @@
       ],
       "domain": null,
       "logo": "https://logos.haveibeenpwned.com/Lovora.png",
-      "verified": true
+      "verified": true,
+      "slug": "lovora-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "dba38ac6d79858c3",
@@ -1416,7 +1789,12 @@
       ],
       "domain": "quitbro.app",
       "logo": "https://logos.haveibeenpwned.com/Quitbro.png",
-      "verified": true
+      "verified": true,
+      "slug": "quitbro-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "63503301ab501c39",
@@ -1437,7 +1815,12 @@
       ],
       "domain": "komiko.app",
       "logo": "https://logos.haveibeenpwned.com/KomikoAI.png",
-      "verified": true
+      "verified": true,
+      "slug": "komiko-2026",
+      "advice": [
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     },
     {
       "id": "138818714b83846f",
@@ -1465,7 +1848,15 @@
       ],
       "domain": "odido.nl",
       "logo": "https://logos.haveibeenpwned.com/Odido.png",
-      "verified": true
+      "verified": true,
+      "slug": "odido-2026",
+      "advice": [
+        "Watch your card and bank statements for unfamiliar charges, and consider requesting a new card number.",
+        "Place a fraud alert or credit freeze with the major credit bureaus to block new accounts opened in your name.",
+        "Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.",
+        "Watch for text-message phishing and SIM-swap attempts on your phone number.",
+        "Be wary of targeted scams that use your personal details to sound convincing."
+      ]
     }
   ]
 }

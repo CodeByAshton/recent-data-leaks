@@ -3,11 +3,15 @@
   "functions": {
     "api/render.js": { "maxDuration": 15 },
     "api/feed.js": { "maxDuration": 15 },
-    "api/sitemap.js": { "maxDuration": 15 }
+    "api/sitemap.js": { "maxDuration": 15 },
+    "api/rss.js": { "maxDuration": 15 },
+    "api/og.js": { "maxDuration": 15 }
   },
   "rewrites": [
     { "source": "/", "destination": "/api/render" },
     { "source": "/breach/:id", "destination": "/api/render?id=:id" },
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
+    { "source": "/year/:yyyy", "destination": "/api/render?year=:yyyy" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/rss.xml", "destination": "/api/rss" }
   ]
 }

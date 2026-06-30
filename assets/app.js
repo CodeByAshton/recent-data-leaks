@@ -86,13 +86,18 @@ function visibleItems() {
 }
 
 // ---------- Router ----------
+// "/" -> home, "/breach/<slug>" -> detail. Other server-rendered routes
+// (e.g. "/year/2026") are left untouched so their SSR content stays in place.
 function routeId() {
   const m = location.pathname.match(/^\/breach\/(.+)$/);
   return m ? decodeURIComponent(m[1]) : null;
 }
-function go(id) {
-  const url = id ? `/breach/${encodeURIComponent(id)}` : "/";
-  history.pushState({ id: id || null }, "", url);
+function isManagedRoute() {
+  return location.pathname === "/" || /^\/breach\//.test(location.pathname);
+}
+function go(key) {
+  const url = key ? `/breach/${encodeURIComponent(key)}` : "/";
+  history.pushState({ key: key || null }, "", url);
   render();
 }
 window.addEventListener("popstate", render);
@@ -100,6 +105,7 @@ window.addEventListener("popstate", render);
 // ---------- Views ----------
 function render() {
   if (!FEED) return;
+  if (!isManagedRoute()) return; // leave server-rendered archive pages alone
   const id = routeId();
   app.innerHTML = "";
   if (id) renderDetail(id);
@@ -110,14 +116,21 @@ function render() {
 function renderList() {
   const items = visibleItems();
 
-  app.appendChild(
-    el("section", { class: "hero" },
-      el("h1", { text: "A live timeline of data breaches" }),
-      el("p", {},
-        el("span", { class: "count", text: String(FEED.count) }),
-        " tracked incidents · newest first")
-    )
+  const hero = el("section", { class: "hero" },
+    el("h1", { text: "A live timeline of data breaches" }),
+    el("p", {},
+      el("span", { class: "count", text: String(FEED.count) }),
+      " tracked incidents · newest first")
   );
+  const years = [...new Set(FEED.items.map((i) => String(i.occurred || i.published || "").slice(0, 4)).filter(Boolean))].sort().reverse();
+  if (years.length) {
+    const nav = el("nav", { class: "yearnav" }, "Browse by year: ");
+    years.forEach((y) => nav.appendChild(el("a", { href: `/year/${y}` }, y)));
+    nav.appendChild(document.createTextNode(" · "));
+    nav.appendChild(el("a", { href: "/rss.xml" }, "RSS"));
+    hero.appendChild(nav);
+  }
+  app.appendChild(hero);
 
   // Search + filters
   const search = el("input", {
@@ -190,15 +203,16 @@ function cardFor(it) {
   if (it.logo) kids.push(el("img", { class: "logo", src: it.logo, alt: "", loading: "lazy", onerror: function () { this.remove(); } }));
   kids.push(body);
 
+  const key = it.slug || it.id;
   return el("a", {
     class: "card" + (isNews ? " news" : ""),
-    href: `/breach/${encodeURIComponent(it.id)}`,
-    onclick: (e) => { e.preventDefault(); go(it.id); },
+    href: `/breach/${encodeURIComponent(key)}`,
+    onclick: (e) => { e.preventDefault(); go(key); },
   }, ...kids);
 }
 
-function renderDetail(id) {
-  const it = FEED.items.find((x) => x.id === id);
+function renderDetail(key) {
+  const it = FEED.items.find((x) => x.slug === key || x.id === key);
   app.appendChild(el("a", {
     class: "back", href: "/", onclick: (e) => { e.preventDefault(); go(null); },
   }, "← Back to timeline"));
@@ -231,12 +245,39 @@ function renderDetail(id) {
     detail.appendChild(ex);
   }
 
+  if (it.advice && it.advice.length) {
+    detail.appendChild(el("div", { class: "section-title", text: "What to do if you were affected" }));
+    const ul = el("ul", { class: "advice" });
+    it.advice.forEach((a) => ul.appendChild(el("li", { text: a })));
+    detail.appendChild(ul);
+  }
+
   detail.appendChild(el("div", { class: "section-title", text: "Details" }));
   detail.appendChild(el("div", { class: "detail-desc", text: it.details || it.summary || "No description available." }));
 
   detail.appendChild(el("a", {
     class: "cta" + (isNews ? " news" : ""), href: it.url, target: "_blank", rel: "noopener noreferrer",
   }, isNews ? "Read full report ↗" : "View on source ↗"));
+
+  // Related breaches: same source first, then same year.
+  let pool = FEED.items.filter((x) => x.id !== it.id && x.source === it.source).slice(0, 4);
+  if (pool.length < 3) {
+    const yr = String(it.published || "").slice(0, 4);
+    const more = FEED.items.filter((x) => x.id !== it.id && String(x.published || "").slice(0, 4) === yr && !pool.includes(x)).slice(0, 4 - pool.length);
+    pool = pool.concat(more);
+  }
+  if (pool.length) {
+    detail.appendChild(el("div", { class: "section-title", text: "Related breaches" }));
+    const ul = el("ul", { class: "related" });
+    pool.forEach((r) => {
+      const rkey = r.slug || r.id;
+      ul.appendChild(el("li", {},
+        el("a", { href: `/breach/${encodeURIComponent(rkey)}`, onclick: (e) => { e.preventDefault(); go(rkey); } }, r.title),
+        el("span", { class: "rel-src", text: r.source })
+      ));
+    });
+    detail.appendChild(ul);
+  }
 
   app.appendChild(detail);
 }

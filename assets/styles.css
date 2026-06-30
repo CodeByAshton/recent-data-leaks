@@ -61,6 +61,9 @@ a { color: inherit; text-decoration: none; }
 }
 .hero p { margin: 0; color: var(--muted); font-size: 16px; }
 .hero .count { color: var(--ink); font-weight: 600; }
+.yearnav { margin: 18px 0 0; font-size: 13px; color: var(--muted); }
+.yearnav a { color: var(--ink-soft); border-bottom: 1px solid var(--line); margin: 0 4px; padding-bottom: 1px; }
+.yearnav a:hover { border-bottom-color: var(--ink); color: var(--ink); }
 
 .controls { margin: 40px 0 0; }
 .search {
@@ -149,6 +152,13 @@ a { color: inherit; text-decoration: none; }
   font-weight: 600; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line);
 }
 .detail-desc { font-family: var(--serif); color: var(--ink-soft); font-size: 18px; line-height: 1.75; }
+.advice { margin: 0; padding-left: 1.15em; }
+.advice li { color: var(--ink-soft); font-size: 15.5px; line-height: 1.7; margin-bottom: 8px; }
+.related { list-style: none; margin: 0; padding: 0; }
+.related li { padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
+.related a { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+.related a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.rel-src { color: var(--faint); font-size: 12.5px; margin-left: 10px; }
 .exposed { display: flex; flex-wrap: wrap; gap: 8px; }
 .exposed .tag {
   background: var(--bg-soft); color: var(--ink-soft); border: 1px solid var(--line);

@@ -64,6 +64,58 @@ function truncate(s, n = 260) {
   return s.slice(0, n).replace(/\s+\S*$/, "") + "...";
 }
 
+function slugify(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
+// Original, page-specific guidance based on what data was exposed. This unique
+// content is what separates a breach page from a copied news snippet.
+function computeAdvice(it) {
+  const classes = (it.tags || []).join(" ").toLowerCase();
+  const has = (...k) => k.some((x) => classes.includes(x));
+  const out = [];
+  if (has("password", "security question"))
+    out.push("Change your password for this account, and anywhere you reused it. Turn on two-factor authentication.");
+  if (has("credit card", "bank", "payment"))
+    out.push("Watch your card and bank statements for unfamiliar charges, and consider requesting a new card number.");
+  if (has("social security", "government", "tax", "passport", "driver"))
+    out.push("Place a fraud alert or credit freeze with the major credit bureaus to block new accounts opened in your name.");
+  if (has("email address"))
+    out.push("Expect more phishing and spam at this address. Treat messages that reference this company with extra caution.");
+  if (has("phone"))
+    out.push("Watch for text-message phishing and SIM-swap attempts on your phone number.");
+  if (has("physical address", "date of birth", "geographic", "names"))
+    out.push("Be wary of targeted scams that use your personal details to sound convincing.");
+  if (!out.length) {
+    out.push("If you have an account with this organization, change your password and enable two-factor authentication.");
+    out.push("Be cautious of phishing emails, calls, or texts that reference this incident.");
+    if (it.sourceType === "breach")
+      out.push("Consider monitoring your credit if sensitive personal information may have been involved.");
+  }
+  return out;
+}
+
+function assignSlugsAndAdvice(items) {
+  const seen = new Set();
+  for (const it of items) {
+    const year = String(it.occurred || it.published || "").slice(0, 4) || "na";
+    let base = slugify(
+      it.sourceType === "breach" && it.domain ? it.domain.split(".")[0] : it.title
+    );
+    base = base.split("-").slice(0, 8).join("-") || "breach";
+    let slug = `${base}-${year}`;
+    if (seen.has(slug)) slug = `${slug}-${it.id.slice(0, 4)}`;
+    seen.add(slug);
+    it.slug = slug;
+    it.advice = computeAdvice(it);
+  }
+}
+
 function looksLikeBreach(text) {
   const t = text.toLowerCase();
   return BREACH_KEYWORDS.some((k) => t.includes(k));
@@ -189,12 +241,15 @@ async function aggregate() {
     return db - da;
   });
 
+  const finalItems = items.slice(0, 250);
+  assignSlugsAndAdvice(finalItems);
+
   return {
     generatedAt: new Date().toISOString(),
-    count: items.length,
+    count: finalItems.length,
     sources: ["Have I Been Pwned", ...NEWS_SOURCES.map((s) => s.name)],
     errors,
-    items: items.slice(0, 250),
+    items: finalItems,
   };
 }
 
