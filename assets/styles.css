@@ -241,6 +241,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
   /* Mobile header: brand left, Refresh centered, hamburger right. */
   .topbar .wrap { gap: 0; justify-content: space-between; }
+  /* Smaller brand, capped so it never reaches the centered Refresh button. */
+  .brand { font-size: 16px; max-width: calc(50% - 66px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .navtoggle { display: flex; }
   .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); gap: 0; }
   .status .dot, #updated { display: none; }
