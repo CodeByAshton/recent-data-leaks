@@ -67,6 +67,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .topnav a:hover { color: var(--ink); }
 .topnav a:hover::after { transform: scaleX(1); }
 .status { flex: none; display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
+/* Fixed width so the changing status text ("Live" -> "Updated 5m ago") never
+   reflows the centered nav. */
+#updated { display: inline-block; min-width: 108px; text-align: right; font-variant-numeric: tabular-nums; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); display: inline-block; }
 .dot.live { background: var(--ink); }
 .ghost-btn {
