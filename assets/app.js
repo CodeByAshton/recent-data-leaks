@@ -125,13 +125,7 @@ function renderList() {
   const years = (FEED.years && FEED.years.length)
     ? FEED.years
     : [...new Set(FEED.items.map((i) => String(i.occurred || i.published || "").slice(0, 4)).filter(Boolean))].sort().reverse();
-  if (years.length) {
-    const nav = el("nav", { class: "yearnav" }, "Browse by year: ");
-    years.forEach((y) => nav.appendChild(el("a", { href: `/year/${y}` }, y)));
-    nav.appendChild(document.createTextNode(" · "));
-    nav.appendChild(el("a", { href: "/rss.xml" }, "RSS"));
-    hero.appendChild(nav);
-  }
+  if (years.length) hero.appendChild(buildYearNav(years));
   app.appendChild(hero);
 
   // Search + filters
@@ -161,6 +155,28 @@ function renderList() {
 function refreshList() {
   const listWrap = document.getElementById("list");
   if (listWrap) drawTimeline(listWrap);
+}
+
+// Paged year nav: shows a window of years with prev/next buttons instead of
+// listing all of them (which wrapped and broke the mobile layout).
+function buildYearNav(years) {
+  const page = (window.matchMedia && window.matchMedia("(max-width: 640px)").matches) ? 4 : 7;
+  let offset = 0;
+  const label = el("span", { class: "yn-label", text: "Browse by year:" });
+  const prev = el("button", { class: "yn-btn", type: "button", "aria-label": "Previous years" }, "‹");
+  const win = el("span", { class: "yn-window" });
+  const next = el("button", { class: "yn-btn", type: "button", "aria-label": "Next years" }, "›");
+  function draw() {
+    win.innerHTML = "";
+    years.slice(offset, offset + page).forEach((y) =>
+      win.appendChild(el("a", { href: `/year/${y}` }, String(y))));
+    prev.disabled = offset <= 0;
+    next.disabled = offset + page >= years.length;
+  }
+  prev.addEventListener("click", () => { offset = Math.max(0, offset - page); draw(); });
+  next.addEventListener("click", () => { offset = Math.min(Math.max(0, years.length - page), offset + page); draw(); });
+  draw();
+  return el("nav", { class: "yearnav", "aria-label": "Browse by year" }, label, prev, win, next);
 }
 
 const HOME_LIMIT = 80;

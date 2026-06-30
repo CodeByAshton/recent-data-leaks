@@ -9,6 +9,8 @@ const { companySlug, GLOSSARY } = require("./_content");
 
 const SITE = "https://recentdataleaks.com";
 const NAME = "Recent Data Leaks";
+// Each word in its own span so the brand can stack one-per-line on mobile.
+const BRAND = NAME.split(" ").map((w) => `<span>${w}</span>`).join(" ");
 const TAGLINE = "A live timeline of data breaches";
 const DESC =
   "Recent Data Leaks is a live, continuously updated timeline of public data breaches: who was breached, when it happened, how many accounts were affected, and what data was exposed. Aggregated from Have I Been Pwned and leading security news sources.";
@@ -73,7 +75,12 @@ function listHTML(items) {
 function yearNavHTML(items) {
   const years = [...new Set(items.map(yearOf).filter(Boolean))].sort().reverse();
   if (!years.length) return "";
-  return `<nav class="yearnav">Browse by year: ${years.map((y) => `<a href="/year/${y}">${y}</a>`).join("")} &middot; <a href="/rss.xml">RSS</a></nav>`;
+  // Static first window + paging buttons. The client (app.js) makes the buttons
+  // interactive on the home page; this is just the initial, non-wrapping paint.
+  const N = 7;
+  const win = years.slice(0, N).map((y) => `<a href="/year/${y}">${y}</a>`).join("");
+  const nextDisabled = years.length <= N ? " disabled" : "";
+  return `<nav class="yearnav" aria-label="Browse by year"><span class="yn-label">Browse by year:</span><button class="yn-btn" type="button" aria-label="Previous years" disabled>&lsaquo;</button><span class="yn-window">${win}</span><button class="yn-btn" type="button" aria-label="Next years"${nextDisabled}>&rsaquo;</button></nav>`;
 }
 
 const HOME_LIMIT = 80;
@@ -256,7 +263,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 </head>
 <body>
 <a class="skip" href="#app">Skip to content</a>
-<header class="topbar"><div class="wrap"><a class="brand" href="/">${NAME}</a><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
+<header class="topbar"><div class="wrap"><a class="brand" href="/">${BRAND}</a><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
 <main class="wrap" id="app">${main}</main>
 <footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script defer src="/_vercel/insights/script.js"></script>

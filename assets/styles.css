@@ -98,9 +98,18 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 }
 .hero p { margin: 0; color: var(--muted); font-size: 16px; }
 .hero .count { color: var(--ink); font-weight: 600; }
-.yearnav { margin: 18px 0 0; font-size: 13px; color: var(--muted); }
-.yearnav a { color: var(--ink-soft); border-bottom: 1px solid var(--line); margin: 0 4px; padding-bottom: 1px; }
-.yearnav a:hover { border-bottom-color: var(--ink); color: var(--ink); }
+.yearnav { margin: 18px 0 0; display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+.yn-label { flex: none; color: var(--muted); font-size: 13px; }
+.yn-window { display: flex; gap: 16px; overflow: hidden; }
+.yn-window a { flex: none; color: var(--ink-soft); border-bottom: 1px solid var(--line); padding-bottom: 1px; font-size: 13px; }
+.yn-window a:hover { border-bottom-color: var(--ink); color: var(--ink); }
+.yn-btn {
+  flex: none; width: 26px; height: 26px; padding: 0; line-height: 1; font-size: 15px;
+  background: var(--bg-soft); border: 1px solid var(--line); color: var(--ink-soft);
+  border-radius: var(--radius); cursor: pointer; transition: .15s;
+}
+.yn-btn:hover:not(:disabled) { border-color: var(--muted); color: var(--ink); }
+.yn-btn:disabled { opacity: .3; cursor: default; }
 
 .controls { margin: 40px 0 0; }
 .search {
@@ -241,9 +250,14 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
   /* Mobile header: brand left, Refresh centered, hamburger right. */
   .topbar .wrap { gap: 0; justify-content: space-between; }
-  /* Smaller brand, capped so it never reaches the centered Refresh button. */
-  .brand { font-size: 16px; max-width: calc(50% - 66px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Brand stacks one word per line so it stays narrow and clears the button. */
+  .brand { font-size: 13px; line-height: 1.12; letter-spacing: 0; }
+  .brand span { display: block; }
   .navtoggle { display: flex; }
+  /* Compact paged year nav. */
+  .yn-label { display: none; }
+  .yearnav { gap: 8px; }
+  .yn-window { gap: 14px; }
   .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); gap: 0; }
   .status .dot, #updated { display: none; }
 
