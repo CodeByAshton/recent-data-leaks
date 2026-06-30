@@ -217,6 +217,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .ranklist li a { color: var(--ink); }
 .ranklist li a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ranklist li b { margin-left: auto; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ranklist li .rank { color: var(--faint); font-variant-numeric: tabular-nums; min-width: 26px; flex: none; }
+.pill-link:hover { background: #1d1d1d; color: var(--ink); }
 .ranklist li .bar { height: 6px; border-radius: 3px; background: var(--ink); width: var(--w); max-width: 45%; opacity: .35; }
 .ranklist.plain li .bar { display: none; }
 

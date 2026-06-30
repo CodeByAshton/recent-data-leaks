@@ -14,6 +14,10 @@
     { "source": "/stats", "destination": "/api/render?view=stats" },
     { "source": "/about", "destination": "/api/render?view=about" },
     { "source": "/methodology", "destination": "/api/render?view=methodology" },
+    { "source": "/biggest-data-breaches", "destination": "/api/render?view=biggest" },
+    { "source": "/company/:slug", "destination": "/api/render?company=:slug" },
+    { "source": "/glossary", "destination": "/api/render?view=glossary" },
+    { "source": "/glossary/:slug", "destination": "/api/render?view=glossary&term=:slug" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/rss.xml", "destination": "/api/rss" }
   ]

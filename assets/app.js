@@ -120,7 +120,11 @@ function renderList() {
       el("span", { class: "count", text: String(FEED.count) }),
       " tracked incidents · newest first")
   );
-  const years = [...new Set(FEED.items.map((i) => String(i.occurred || i.published || "").slice(0, 4)).filter(Boolean))].sort().reverse();
+  // Prefer the full year list from the API (matches the server-rendered nav);
+  // fall back to deriving from loaded items.
+  const years = (FEED.years && FEED.years.length)
+    ? FEED.years
+    : [...new Set(FEED.items.map((i) => String(i.occurred || i.published || "").slice(0, 4)).filter(Boolean))].sort().reverse();
   if (years.length) {
     const nav = el("nav", { class: "yearnav" }, "Browse by year: ");
     years.forEach((y) => nav.appendChild(el("a", { href: `/year/${y}` }, y)));

@@ -35,8 +35,10 @@ Routing is wired in `vercel.json` (rewrites `/`, `/breach/:slug`, `/year/:yyyy`,
 - Keyword-friendly slug URLs (`/breach/company-year`); old hash URLs 301 to the slug.
 - Per-breach FAQ with FAQPage structured data (eligible for rich results).
 - Original "what to do if you were affected" guidance to avoid thin/duplicate content.
-- Year archives (`/year/:yyyy`), a statistics page (`/stats`), and trust pages
-  (`/about`, `/methodology`) with internal linking.
+- Year archives (`/year/:yyyy`), a statistics page (`/stats`), "biggest breaches
+  of all time" (`/biggest-data-breaches`), per-company hubs (`/company/:slug`),
+  a glossary (`/glossary`), and trust pages (`/about`, `/methodology`), all cross-linked.
+- Vercel Web Analytics (enable it in the Vercel dashboard → Analytics tab).
 - Near-duplicate news stories about the same incident are clustered.
 - Dynamic `sitemap.xml`, RSS feed (`/rss.xml`), and per-breach OG images.
 - Search Console / Bing verification via env vars `GOOGLE_SITE_VERIFICATION` and

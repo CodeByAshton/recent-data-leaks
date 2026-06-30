@@ -5,6 +5,7 @@
 // pages indexable. Falls back to the bundled snapshot.
 
 const { getFeed } = require("./_feed");
+const { companySlug, GLOSSARY } = require("./_content");
 
 const SITE = "https://recentdataleaks.com";
 const NAME = "Recent Data Leaks";
@@ -166,6 +167,7 @@ function detailMain(it, items) {
   if (it.occurred) pills.push(`<span class="pill">Occurred <b>${esc(fmtDate(it.occurred))}</b></span>`);
   if (it.affected) pills.push(`<span class="pill danger"><b>${esc(fmtNum(it.affected))}</b> accounts</span>`);
   if (it.domain) pills.push(`<span class="pill"><b>${esc(it.domain)}</b></span>`);
+  if (!isNews) pills.push(`<a class="pill pill-link" href="/company/${esc(companySlug(it))}">All ${esc(it.title)} breaches &rarr;</a>`);
 
   const exposed = (it.tags && it.tags.length)
     ? `<div class="section-title">What was exposed</div><div class="exposed">${it.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>`
@@ -178,6 +180,42 @@ function detailMain(it, items) {
     : "";
 
   return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><div class="detail-head">${logo}<div><h1>${esc(it.title)}</h1><div class="detail-meta">${pills.join("")}</div></div></div>${exposed}${advice}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
+}
+
+// ---------- SEO surface pages ----------
+function biggestMain(feed) {
+  const top = feed.items
+    .filter((x) => x.sourceType === "breach" && x.affected)
+    .sort((a, b) => b.affected - a.affected)
+    .slice(0, 50);
+  const rows = top.map((b, i) =>
+    `<li><span class="rank">${i + 1}</span><a href="/breach/${esc(b.slug)}">${esc(b.title)}</a><span class="rel-src">${b.occurred ? new Date(b.occurred).getFullYear() : (b.published ? new Date(b.published).getFullYear() : "")}</span><b>${esc(fmtNum(b.affected))}</b></li>`).join("");
+  return `<a class="back" href="/">&larr; Back to timeline</a><section class="hero"><h1>The biggest data breaches of all time</h1><p>The largest known breaches by number of accounts affected, drawn from the ${feed.count} incidents tracked here.</p></section><ul class="ranklist plain">${rows}</ul>`;
+}
+
+function companyMain(feed, slug) {
+  const items = feed.items.filter((x) => x.sourceType === "breach" && companySlug(x) === slug);
+  if (!items.length) return null;
+  const name = items[0].title;
+  const tags = [...new Set(items.flatMap((x) => x.tags || []))];
+  const total = items.reduce((s, x) => s + (x.affected || 0), 0);
+  const incidents = items.map((b) =>
+    `<li><a href="/breach/${esc(b.slug)}">${esc(b.title)}</a><span class="rel-src">${b.occurred ? fmtDate(b.occurred) : (b.published ? fmtDate(b.published) : "")}</span>${b.affected ? `<b>${esc(fmtNum(b.affected))}</b>` : ""}</li>`).join("");
+  const exposed = tags.length
+    ? `<div class="section-title">Data exposed across these incidents</div><div class="exposed">${tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>`
+    : "";
+  const intro = `${esc(name)} appears in ${items.length} tracked breach${items.length > 1 ? "es" : ""}${total ? `, affecting around ${fmtNum(total)} accounts in total` : ""}.`;
+  return `<a class="back" href="/">&larr; Back to timeline</a><section class="hero"><h1>Has ${esc(name)} had a data breach?</h1><p>${intro}</p></section><div class="section-title">Known incidents</div><ul class="ranklist plain">${incidents}</ul>${exposed}<div class="prose" style="margin-top:24px"><p>If you have an account with ${esc(name)}, change your password and turn on two-factor authentication, and treat messages that reference the company with caution. Open any incident above for what was exposed and what to do.</p></div>`;
+}
+
+function glossaryIndexMain() {
+  const rows = GLOSSARY.map((g) =>
+    `<li><a href="/glossary/${g.slug}">${esc(g.term)}</a><span class="rel-src">${esc(g.short)}</span></li>`).join("");
+  return `<a class="back" href="/">&larr; Back to timeline</a><section class="hero"><h1>Security &amp; breach glossary</h1><p>Plain-English definitions of common data-breach and security terms.</p></section><ul class="related">${rows}</ul>`;
+}
+
+function glossaryTermMain(g) {
+  return `<a class="back" href="/glossary">&larr; All terms</a><section class="hero"><h1>${esc(g.term)}</h1></section><div class="prose"><p>${esc(g.body)}</p><p><a href="/glossary">Back to the glossary</a> or <a href="/">browse recent data breaches</a>.</p></div>`;
 }
 
 // ---------- document ----------
@@ -220,7 +258,8 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <a class="skip" href="#app">Skip to content</a>
 <header class="topbar"><div class="wrap"><a class="brand" href="/">${NAME}</a><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
 <main class="wrap" id="app">${main}</main>
-<footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
+<footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
+<script defer src="/_vercel/insights/script.js"></script>
 <script src="/assets/app.js"></script>
 </body>
 </html>`;
@@ -232,6 +271,8 @@ module.exports = async function handler(req, res) {
   const id = u.searchParams.get("id");
   const year = u.searchParams.get("year");
   const view = u.searchParams.get("view");
+  const company = u.searchParams.get("company");
+  const term = u.searchParams.get("term");
   const feed = await getFeed();
 
   let html, status = 200;
@@ -312,6 +353,72 @@ module.exports = async function handler(req, res) {
       jsonld: ld,
       main: yearMain(items, year),
     });
+  } else if (company) {
+    const main = companyMain(feed, company);
+    if (!main) {
+      status = 404;
+      html = page({
+        title: `Not found — ${NAME}`,
+        description: "No tracked breaches found for this company.",
+        canonical: `${SITE}/`,
+        robots: "noindex, follow",
+        main: `<a class="back" href="/">&larr; Back to timeline</a><div class="empty">No tracked breaches found for that company.</div>`,
+      });
+    } else {
+      const cItems = feed.items.filter((x) => x.sourceType === "breach" && companySlug(x) === company);
+      const name = cItems[0].title;
+      const ld = jsonLd({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [{
+          "@type": "Question",
+          name: `Has ${name} had a data breach?`,
+          acceptedAnswer: { "@type": "Answer", text: `${name} appears in ${cItems.length} tracked breach${cItems.length > 1 ? "es" : ""}.` },
+        }],
+      });
+      html = page({
+        title: `Has ${name} had a data breach? — ${NAME}`,
+        description: `Known data breaches involving ${name}: dates, accounts affected, and what data was exposed.`,
+        canonical: `${SITE}/company/${company}`,
+        jsonld: ld,
+        main,
+      });
+    }
+  } else if (view === "biggest") {
+    html = page({
+      title: `The biggest data breaches of all time — ${NAME}`,
+      description: "The largest known data breaches ranked by number of accounts affected, with what was exposed and links to each incident.",
+      canonical: `${SITE}/biggest-data-breaches`,
+      jsonld: jsonLd({ "@context": "https://schema.org", "@type": "CollectionPage", name: "The biggest data breaches of all time", url: `${SITE}/biggest-data-breaches` }),
+      main: biggestMain(feed),
+    });
+  } else if (view === "glossary") {
+    const g = term ? GLOSSARY.find((x) => x.slug === term) : null;
+    if (term && !g) {
+      status = 404;
+      html = page({
+        title: `Not found — ${NAME}`,
+        description: "Term not found.",
+        canonical: `${SITE}/glossary`,
+        robots: "noindex, follow",
+        main: `<a class="back" href="/glossary">&larr; All terms</a><div class="empty">That term isn&#39;t in the glossary.</div>`,
+      });
+    } else if (g) {
+      html = page({
+        title: `${g.term} — ${NAME}`,
+        description: g.short,
+        canonical: `${SITE}/glossary/${g.slug}`,
+        jsonld: jsonLd({ "@context": "https://schema.org", "@type": "DefinedTerm", name: g.term, description: g.body, inDefinedTermSet: `${SITE}/glossary` }),
+        main: glossaryTermMain(g),
+      });
+    } else {
+      html = page({
+        title: `Security & breach glossary — ${NAME}`,
+        description: "Plain-English definitions of common data-breach and security terms: phishing, credential stuffing, ransomware, credit freeze, and more.",
+        canonical: `${SITE}/glossary`,
+        main: glossaryIndexMain(),
+      });
+    }
   } else if (view === "stats") {
     html = page({
       title: `Data breach statistics — ${NAME}`,

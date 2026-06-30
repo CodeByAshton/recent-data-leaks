@@ -15,8 +15,14 @@ module.exports = async function handler(req, res) {
     if (feed.items.length > 0) {
       // The full catalog is large; the client only needs a recent window and
       // not the long `details` body (the server renders that into pages).
+      // Include the full year list so the client's year nav matches the
+      // server-rendered one (otherwise all years flash, then shrink to recent).
+      const years = [...new Set(
+        feed.items.map((x) => String(x.occurred || x.published || "").slice(0, 4)).filter(Boolean)
+      )].sort().reverse();
       const light = {
         ...feed,
+        years,
         items: feed.items.slice(0, 100).map(({ details, ...rest }) => rest),
       };
       res.setHeader(
