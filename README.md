@@ -31,11 +31,20 @@ Routing is wired in `vercel.json` (rewrites `/`, `/breach/:slug`, `/year/:yyyy`,
 
 ### SEO
 - Server-rendered pages with per-page `<title>`, meta description, Open Graph, and JSON-LD.
-- Keyword-friendly slug URLs (`/breach/company-year`) and year archive pages with internal links.
-- Original per-breach guidance ("what to do if you were affected") to avoid thin/duplicate content.
-- Dynamic `sitemap.xml`, RSS feed, and per-breach OG images.
+- Full breach catalog (~1,000 incidents) so every breach is its own indexable page.
+- Keyword-friendly slug URLs (`/breach/company-year`); old hash URLs 301 to the slug.
+- Per-breach FAQ with FAQPage structured data (eligible for rich results).
+- Original "what to do if you were affected" guidance to avoid thin/duplicate content.
+- Year archives (`/year/:yyyy`), a statistics page (`/stats`), and trust pages
+  (`/about`, `/methodology`) with internal linking.
+- Near-duplicate news stories about the same incident are clustered.
+- Dynamic `sitemap.xml`, RSS feed (`/rss.xml`), and per-breach OG images.
 - Search Console / Bing verification via env vars `GOOGLE_SITE_VERIFICATION` and
   `BING_SITE_VERIFICATION` (set them in Vercel → Settings → Environment Variables).
+
+The home timeline shows the 80 most recent incidents; the full catalog is reachable
+through year archives, search, and the sitemap. `/api/feed` returns a light recent
+window for client hydration.
 
 ### Sources
 Have I Been Pwned (confirmed breaches) plus breach reporting from BleepingComputer,

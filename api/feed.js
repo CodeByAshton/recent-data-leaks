@@ -13,13 +13,19 @@ module.exports = async function handler(req, res) {
     // If we got real data, cache it hard at the edge: serve cached for 15 min,
     // then revalidate in the background for up to an hour.
     if (feed.items.length > 0) {
+      // The full catalog is large; the client only needs a recent window and
+      // not the long `details` body (the server renders that into pages).
+      const light = {
+        ...feed,
+        items: feed.items.slice(0, 100).map(({ details, ...rest }) => rest),
+      };
       res.setHeader(
         "Cache-Control",
         "public, s-maxage=900, stale-while-revalidate=3600"
       );
       res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.statusCode = 200;
-      return res.end(JSON.stringify(feed));
+      return res.end(JSON.stringify(light));
     }
     throw new Error("no items aggregated");
   } catch (err) {

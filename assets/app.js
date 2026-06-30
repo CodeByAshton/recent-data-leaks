@@ -114,8 +114,6 @@ function render() {
 }
 
 function renderList() {
-  const items = visibleItems();
-
   const hero = el("section", { class: "hero" },
     el("h1", { text: "A live timeline of data breaches" }),
     el("p", {},
@@ -153,20 +151,26 @@ function renderList() {
 
   const listWrap = el("div", { id: "list" });
   app.appendChild(listWrap);
-  drawTimeline(listWrap, items);
+  drawTimeline(listWrap);
 }
 
 function refreshList() {
   const listWrap = document.getElementById("list");
-  if (listWrap) drawTimeline(listWrap, visibleItems());
+  if (listWrap) drawTimeline(listWrap);
 }
 
-function drawTimeline(container, items) {
+const HOME_LIMIT = 80;
+function drawTimeline(container) {
   container.innerHTML = "";
-  if (!items.length) {
+  const all = visibleItems();
+  if (!all.length) {
     container.appendChild(el("div", { class: "empty", text: "No incidents match your filters." }));
     return;
   }
+  // Cap the home view; show everything once the user filters or searches.
+  const hasFilter = filter.q.trim() || filter.source !== "all";
+  const items = hasFilter ? all : all.slice(0, HOME_LIMIT);
+
   const tl = el("div", { class: "timeline" });
   let currentDay = null;
   let dayWrap = null;
@@ -181,6 +185,13 @@ function drawTimeline(container, items) {
     dayWrap.appendChild(cardFor(it));
   }
   container.appendChild(tl);
+
+  if (!hasFilter && FEED.count > HOME_LIMIT) {
+    container.appendChild(el("p", { class: "more-note" },
+      `Showing the ${HOME_LIMIT} most recent of ${FEED.count} tracked incidents. `,
+      el("a", { href: "/stats" }, "See statistics"),
+      " or browse by year above."));
+  }
 }
 
 function cardFor(it) {
@@ -255,11 +266,21 @@ function renderDetail(key) {
   detail.appendChild(el("div", { class: "section-title", text: "Details" }));
   detail.appendChild(el("div", { class: "detail-desc", text: it.details || it.summary || "No description available." }));
 
+  if (it.faq && it.faq.length) {
+    detail.appendChild(el("div", { class: "section-title", text: "Frequently asked questions" }));
+    const wrap = el("div", { class: "faq" });
+    it.faq.forEach((f) => wrap.appendChild(el("div", { class: "faq-item" },
+      el("h3", { class: "faq-q", text: f.q }),
+      el("p", { class: "faq-a", text: f.a }))));
+    detail.appendChild(wrap);
+  }
+
   detail.appendChild(el("a", {
     class: "cta" + (isNews ? " news" : ""), href: it.url, target: "_blank", rel: "noopener noreferrer",
   }, isNews ? "Read full report ↗" : "View on source ↗"));
 
-  // Related breaches: same source first, then same year.
+  // Related breaches: same source first, then same year. Plain links (full
+  // navigation) so breaches outside the loaded recent window still resolve via SSR.
   let pool = FEED.items.filter((x) => x.id !== it.id && x.source === it.source).slice(0, 4);
   if (pool.length < 3) {
     const yr = String(it.published || "").slice(0, 4);
@@ -270,9 +291,8 @@ function renderDetail(key) {
     detail.appendChild(el("div", { class: "section-title", text: "Related breaches" }));
     const ul = el("ul", { class: "related" });
     pool.forEach((r) => {
-      const rkey = r.slug || r.id;
       ul.appendChild(el("li", {},
-        el("a", { href: `/breach/${encodeURIComponent(rkey)}`, onclick: (e) => { e.preventDefault(); go(rkey); } }, r.title),
+        el("a", { href: `/breach/${encodeURIComponent(r.slug || r.id)}` }, r.title),
         el("span", { class: "rel-src", text: r.source })
       ));
     });

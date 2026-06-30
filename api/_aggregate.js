@@ -100,7 +100,81 @@ function computeAdvice(it) {
   return out;
 }
 
-function assignSlugsAndAdvice(items) {
+function listToText(arr, max = 8) {
+  const a = (arr || []).slice(0, max);
+  if (!a.length) return "";
+  if (a.length === 1) return a[0];
+  return a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+}
+
+// Original FAQ per breach. FAQPage structured data is eligible for rich results
+// in Google, and the copy is unique to this site.
+function computeFaq(it) {
+  const isNews = it.sourceType === "news";
+  const noun = isNews ? "incident" : "data breach";
+  const faq = [];
+  faq.push({
+    q: `What is the ${it.title} ${noun}?`,
+    a: it.summary || `${it.title} is a ${isNews ? "reported security incident" : "data breach"} tracked by Recent Data Leaks.`,
+  });
+  if (it.occurred || it.published) {
+    const when = it.occurred
+      ? `occurred around ${new Date(it.occurred).toLocaleDateString("en-US", { year: "numeric", month: "long" })}`
+      : `was disclosed on ${new Date(it.published).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`;
+    faq.push({ q: `When did the ${noun} happen?`, a: `This ${noun} ${when}.` });
+  }
+  if (it.affected)
+    faq.push({ q: "How many accounts were affected?", a: `Around ${it.affected.toLocaleString("en-US")} accounts were affected.` });
+  if (it.tags && it.tags.length)
+    faq.push({ q: "What information was exposed?", a: `Exposed data included ${listToText(it.tags)}.` });
+  if (it.advice && it.advice.length)
+    faq.push({ q: "What should I do if I was affected?", a: it.advice.join(" ") });
+  return faq;
+}
+
+// Collapse near-duplicate news that covers the same incident. Heuristic: two
+// news items that share a distinctive (non-topic) word and fall within 21 days
+// are treated as the same story; the newest is kept.
+const TOPIC_STOP = new Set(
+  ("the a an and or of to in on for with after says said new newly data breach breaches breached " +
+   "leak leaks leaked hack hacks hacked hacker hackers hacking attack attacks attacked cyber cyberattack " +
+   "ransomware exposed exposes exposing expose stolen steal steals theft million millions billion thousand " +
+   "accounts records customers users user clients people personal information info amid over into from your " +
+   "you how why what who security incident report reports reportedly database online million-record")
+    .split(/\s+/)
+);
+function distinctiveTokens(title) {
+  return new Set(
+    String(title || "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/)
+      .filter((w) => w.length >= 4 && !TOPIC_STOP.has(w))
+  );
+}
+function clusterNews(items) {
+  const kept = [];
+  const newsAnchors = [];
+  for (const it of items) {
+    if (it.sourceType !== "news") { kept.push(it); continue; }
+    const toks = distinctiveTokens(it.title);
+    const t = it.published ? Date.parse(it.published) : 0;
+    let dup = null;
+    for (const a of newsAnchors) {
+      const shared = [...toks].some((x) => a._toks.has(x));
+      const within = Math.abs(a._t - t) <= 10 * 86400 * 1000;
+      if (shared && within) { dup = a; break; }
+    }
+    if (dup) { dup._also = (dup._also || 1) + 1; continue; }
+    it._toks = toks; it._t = t;
+    newsAnchors.push(it);
+    kept.push(it);
+  }
+  for (const it of kept) {
+    if (it._toks) { delete it._toks; delete it._t; }
+    if (it._also) { it.alsoReported = it._also; delete it._also; }
+  }
+  return kept;
+}
+
+function assignDerived(items) {
   const seen = new Set();
   for (const it of items) {
     const year = String(it.occurred || it.published || "").slice(0, 4) || "na";
@@ -113,6 +187,7 @@ function assignSlugsAndAdvice(items) {
     seen.add(slug);
     it.slug = slug;
     it.advice = computeAdvice(it);
+    it.faq = computeFaq(it);
   }
 }
 
@@ -137,7 +212,8 @@ async function fetchHIBP() {
   if (!res.ok) throw new Error(`HIBP HTTP ${res.status}`);
   const breaches = await res.json();
   breaches.sort((a, b) => new Date(b.AddedDate) - new Date(a.AddedDate));
-  return breaches.slice(0, 60).map((b) => {
+  // Full catalog (~800 breaches) so every breach gets its own indexable page.
+  return breaches.map((b) => {
     const full = decodeEntities(b.Description);
     return {
       id: sha("hibp:" + b.Name),
@@ -241,8 +317,9 @@ async function aggregate() {
     return db - da;
   });
 
-  const finalItems = items.slice(0, 250);
-  assignSlugsAndAdvice(finalItems);
+  const clustered = clusterNews(items);
+  const finalItems = clustered.slice(0, 1000);
+  assignDerived(finalItems);
 
   return {
     generatedAt: new Date().toISOString(),

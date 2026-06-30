@@ -75,8 +75,71 @@ function yearNavHTML(items) {
   return `<nav class="yearnav">Browse by year: ${years.map((y) => `<a href="/year/${y}">${y}</a>`).join("")} &middot; <a href="/rss.xml">RSS</a></nav>`;
 }
 
+const HOME_LIMIT = 80;
 function homeMain(feed) {
-  return `<section class="hero"><h1>${esc(TAGLINE)}</h1><p><span class="count">${feed.count}</span> tracked incidents &middot; newest first</p>${yearNavHTML(feed.items)}</section>${listHTML(feed.items)}`;
+  const recent = feed.items.slice(0, HOME_LIMIT);
+  const more = feed.count > HOME_LIMIT
+    ? `<p class="more-note">Showing the ${HOME_LIMIT} most recent of ${feed.count} tracked incidents. <a href="/stats">See statistics</a> or browse by year above.</p>`
+    : "";
+  return `<section class="hero"><h1>${esc(TAGLINE)}</h1><p><span class="count">${feed.count}</span> tracked incidents &middot; newest first</p>${yearNavHTML(feed.items)}</section>${listHTML(recent)}${more}`;
+}
+
+function statsMain(feed) {
+  const items = feed.items;
+  const breaches = items.filter((x) => x.sourceType === "breach");
+  const totalAccounts = breaches.reduce((s, x) => s + (x.affected || 0), 0);
+  const byYear = {};
+  for (const it of items) { const y = yearOf(it); if (y) byYear[y] = (byYear[y] || 0) + 1; }
+  const years = Object.keys(byYear).sort().reverse();
+  const tagCount = {};
+  for (const b of breaches) for (const t of b.tags || []) tagCount[t] = (tagCount[t] || 0) + 1;
+  const topTags = Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const largest = [...breaches].filter((x) => x.affected).sort((a, b) => b.affected - a.affected).slice(0, 8);
+
+  const stat = (n, l) => `<div class="stat"><div class="stat-n">${esc(n)}</div><div class="stat-l">${esc(l)}</div></div>`;
+  const yearRows = years.map((y) => `<li><a href="/year/${y}">${y}</a><span class="bar" style="--w:${Math.round((byYear[y] / Math.max(...Object.values(byYear))) * 100)}%"></span><b>${byYear[y]}</b></li>`).join("");
+  const tagRows = topTags.map(([t, c]) => `<li><span>${esc(t)}</span><b>${c}</b></li>`).join("");
+  const bigRows = largest.map((b) => `<li><a href="/breach/${esc(b.slug)}">${esc(b.title)}</a><b>${esc(fmtNum(b.affected))}</b></li>`).join("");
+
+  return `<a class="back" href="/">&larr; Back to timeline</a>
+<section class="hero"><h1>Data breach statistics</h1><p>A live snapshot of what Recent Data Leaks is tracking.</p></section>
+<div class="statgrid">${stat(fmtNum(feed.count), "incidents tracked")}${stat(fmtNum(breaches.length), "confirmed breaches")}${stat(fmtNum(totalAccounts), "accounts exposed")}${stat(years.length, "years covered")}</div>
+<div class="section-title">Incidents by year</div><ul class="ranklist">${yearRows}</ul>
+<div class="section-title">Most commonly exposed data</div><ul class="ranklist plain">${tagRows}</ul>
+<div class="section-title">Largest breaches by accounts</div><ul class="ranklist plain">${bigRows}</ul>`;
+}
+
+function aboutMain() {
+  return `<a class="back" href="/">&larr; Back to timeline</a>
+<section class="hero"><h1>About Recent Data Leaks</h1></section>
+<div class="prose">
+<p>Recent Data Leaks is a continuously updated timeline of public data breaches. The goal is simple: help people quickly see who was breached, when it happened, how many accounts were affected, what data was exposed, and what to do about it.</p>
+<p>Every breach has its own page with a plain-English summary, the categories of data exposed, and concrete steps to take if you may be affected. The site refreshes automatically as new breaches are disclosed.</p>
+<p>Recent Data Leaks aggregates publicly available information and links back to the original sources. It is not affiliated with any of them, and it is provided for awareness only. It is not legal, financial, or security advice.</p>
+<p>See the <a href="/methodology">methodology</a> for how the data is collected, or browse the <a href="/stats">statistics</a>.</p>
+</div>`;
+}
+
+function methodologyMain(feed) {
+  return `<a class="back" href="/">&larr; Back to timeline</a>
+<section class="hero"><h1>Methodology</h1></section>
+<div class="prose">
+<p>Recent Data Leaks aggregates breach information from public sources and normalizes it into a single timeline.</p>
+<h2>Sources</h2>
+<ul>
+<li><b>Have I Been Pwned</b> &mdash; the catalog of confirmed, verified breaches, including the company, date, number of accounts, and the categories of data exposed.</li>
+<li><b>Security news</b> &mdash; breach reporting from BleepingComputer, The Hacker News, Krebs on Security, The Record, and SecurityWeek, filtered to genuine data-breach incidents.</li>
+</ul>
+<h2>How it works</h2>
+<ul>
+<li>Sources are fetched server-side and combined into one feed, refreshed roughly every 15 minutes.</li>
+<li>News headlines are filtered with breach-specific keywords, and near-duplicate stories about the same incident are collapsed.</li>
+<li>Each breach page adds an original summary, the exposed-data categories, and "what to do if affected" guidance.</li>
+<li>Account totals and dates come directly from the source records.</li>
+</ul>
+<h2>Limitations</h2>
+<p>Breach data is inherently incomplete and sometimes revised after disclosure. Account counts are estimates reported at the time. Always confirm details with the original source before acting. Currently tracking ${feed.count} incidents.</p>
+</div>`;
 }
 
 function yearMain(items, year) {
@@ -110,8 +173,11 @@ function detailMain(it, items) {
   const advice = (it.advice && it.advice.length)
     ? `<div class="section-title">What to do if you were affected</div><ul class="advice">${it.advice.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>`
     : "";
+  const faq = (it.faq && it.faq.length)
+    ? `<div class="section-title">Frequently asked questions</div><div class="faq">${it.faq.map((f) => `<div class="faq-item"><h3 class="faq-q">${esc(f.q)}</h3><p class="faq-a">${esc(f.a)}</p></div>`).join("")}</div>`
+    : "";
 
-  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><div class="detail-head">${logo}<div><h1>${esc(it.title)}</h1><div class="detail-meta">${pills.join("")}</div></div></div>${exposed}${advice}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div><a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
+  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><div class="detail-head">${logo}<div><h1>${esc(it.title)}</h1><div class="detail-meta">${pills.join("")}</div></div></div>${exposed}${advice}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
 }
 
 // ---------- document ----------
@@ -151,9 +217,10 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <link rel="stylesheet" href="/assets/styles.css" />
 </head>
 <body>
-<header class="topbar"><div class="wrap"><a class="brand" href="/">${NAME}</a><div class="status"><span class="dot live" id="liveDot"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" title="Refresh">Refresh</button></div></div></header>
+<a class="skip" href="#app">Skip to content</a>
+<header class="topbar"><div class="wrap"><a class="brand" href="/">${NAME}</a><nav class="topnav" aria-label="Primary"><a href="/stats">Stats</a><a href="/about">About</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div></div></header>
 <main class="wrap" id="app">${main}</main>
-<footer class="wrap foot"><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only. <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></p></footer>
+<footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script src="/assets/app.js"></script>
 </body>
 </html>`;
@@ -164,12 +231,19 @@ module.exports = async function handler(req, res) {
   const u = new URL(req.url, "http://localhost");
   const id = u.searchParams.get("id");
   const year = u.searchParams.get("year");
+  const view = u.searchParams.get("view");
   const feed = await getFeed();
 
   let html, status = 200;
 
   if (id) {
     const it = feed.items.find((x) => x.slug === id || x.id === id);
+    // Consolidate old hash-id links onto the canonical slug URL with a 301.
+    if (it && id === it.id && it.slug && id !== it.slug) {
+      res.statusCode = 301;
+      res.setHeader("Location", `/breach/${it.slug}`);
+      return res.end();
+    }
     if (!it) {
       status = 404;
       html = page({
@@ -180,28 +254,36 @@ module.exports = async function handler(req, res) {
         main: `<a class="back" href="/">&larr; Back to timeline</a><div class="empty">That incident isn&#39;t in the current feed.</div>`,
       });
     } else {
-      const ld = jsonLd({
-        "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "Article",
-            headline: it.title,
-            description: it.summary || DESC,
-            datePublished: it.published || undefined,
-            dateModified: it.published || undefined,
-            mainEntityOfPage: `${SITE}/breach/${it.slug || it.id}`,
-            author: { "@type": "Organization", name: NAME },
-            publisher: { "@type": "Organization", name: NAME },
-          },
-          {
-            "@type": "BreadcrumbList",
-            itemListElement: [
-              { "@type": "ListItem", position: 1, name: NAME, item: `${SITE}/` },
-              { "@type": "ListItem", position: 2, name: it.title },
-            ],
-          },
-        ],
-      });
+      const graph = [
+        {
+          "@type": "Article",
+          headline: it.title,
+          description: it.summary || DESC,
+          datePublished: it.published || undefined,
+          dateModified: it.published || undefined,
+          mainEntityOfPage: `${SITE}/breach/${it.slug || it.id}`,
+          author: { "@type": "Organization", name: NAME },
+          publisher: { "@type": "Organization", name: NAME },
+        },
+        {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: NAME, item: `${SITE}/` },
+            { "@type": "ListItem", position: 2, name: it.title },
+          ],
+        },
+      ];
+      if (it.faq && it.faq.length) {
+        graph.push({
+          "@type": "FAQPage",
+          mainEntity: it.faq.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        });
+      }
+      const ld = jsonLd({ "@context": "https://schema.org", "@graph": graph });
       const affected = it.affected ? ` ${fmtNum(it.affected)} accounts affected.` : "";
       html = page({
         title: `${it.title} — ${NAME}`,
@@ -229,6 +311,28 @@ module.exports = async function handler(req, res) {
       robots: items.length ? undefined : "noindex, follow",
       jsonld: ld,
       main: yearMain(items, year),
+    });
+  } else if (view === "stats") {
+    html = page({
+      title: `Data breach statistics — ${NAME}`,
+      description: "Live statistics on the data breaches tracked by Recent Data Leaks: total incidents, accounts exposed, breaches by year, and the most commonly exposed data.",
+      canonical: `${SITE}/stats`,
+      jsonld: jsonLd({ "@context": "https://schema.org", "@type": "CollectionPage", name: "Data breach statistics", url: `${SITE}/stats`, description: "Statistics on tracked public data breaches." }),
+      main: statsMain(feed),
+    });
+  } else if (view === "about") {
+    html = page({
+      title: `About — ${NAME}`,
+      description: "About Recent Data Leaks: a live timeline of public data breaches built to help people see who was breached, what was exposed, and what to do.",
+      canonical: `${SITE}/about`,
+      main: aboutMain(),
+    });
+  } else if (view === "methodology") {
+    html = page({
+      title: `Methodology — ${NAME}`,
+      description: "How Recent Data Leaks collects and normalizes breach data: its sources, refresh cadence, news filtering, and limitations.",
+      canonical: `${SITE}/methodology`,
+      main: methodologyMain(feed),
     });
   } else {
     const ld = jsonLd({

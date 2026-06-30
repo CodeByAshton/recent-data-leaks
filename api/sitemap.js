@@ -12,6 +12,9 @@ module.exports = async function handler(req, res) {
 
   const urls = [
     `  <url><loc>${SITE}/</loc><changefreq>hourly</changefreq><priority>1.0</priority></url>`,
+    `  <url><loc>${SITE}/stats</loc><changefreq>daily</changefreq><priority>0.7</priority></url>`,
+    `  <url><loc>${SITE}/about</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
+    `  <url><loc>${SITE}/methodology</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
     ...years.map((y) => `  <url><loc>${SITE}/year/${y}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>`),
     ...feed.items.map((it) => {
       const lastmod = it.published ? `<lastmod>${new Date(it.published).toISOString()}</lastmod>` : "";

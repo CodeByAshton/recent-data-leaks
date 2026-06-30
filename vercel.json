@@ -11,6 +11,9 @@
     { "source": "/", "destination": "/api/render" },
     { "source": "/breach/:id", "destination": "/api/render?id=:id" },
     { "source": "/year/:yyyy", "destination": "/api/render?year=:yyyy" },
+    { "source": "/stats", "destination": "/api/render?view=stats" },
+    { "source": "/about", "destination": "/api/render?view=about" },
+    { "source": "/methodology", "destination": "/api/render?view=methodology" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/rss.xml", "destination": "/api/rss" }
   ]
