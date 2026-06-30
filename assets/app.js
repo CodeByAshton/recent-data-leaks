@@ -330,6 +330,23 @@ document.getElementById("refresh").addEventListener("click", async () => {
   try { await loadFeed(); setUpdated(); render(); } catch (_) { updatedEl.textContent = "Offline"; }
 });
 
+// Mobile hamburger: toggle the nav dropdown. Wired independently of the feed so
+// it works on every page, even server-rendered ones the client doesn't manage.
+const navToggle = document.getElementById("navtoggle");
+const topNav = document.getElementById("topnav");
+if (navToggle && topNav) {
+  navToggle.addEventListener("click", () => {
+    const open = topNav.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  topNav.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", () => {
+      topNav.classList.remove("open");
+      navToggle.setAttribute("aria-expanded", "false");
+    })
+  );
+}
+
 // Auto-refresh data every 5 minutes while the tab is open.
 setInterval(async () => {
   try { await loadFeed(); setUpdated(); if (!routeId()) refreshList(); } catch (_) {}

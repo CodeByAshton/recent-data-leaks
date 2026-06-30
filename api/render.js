@@ -218,7 +218,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 </head>
 <body>
 <a class="skip" href="#app">Skip to content</a>
-<header class="topbar"><div class="wrap"><a class="brand" href="/">${NAME}</a><nav class="topnav" aria-label="Primary"><a href="/stats">Stats</a><a href="/about">About</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div></div></header>
+<header class="topbar"><div class="wrap"><a class="brand" href="/">${NAME}</a><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
 <main class="wrap" id="app">${main}</main>
 <footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script src="/assets/app.js"></script>
