@@ -254,16 +254,12 @@ function cardFor(it) {
   if (it.occurred) meta.appendChild(el("span", {}, "Occurred ", el("b", { text: new Date(it.occurred).getFullYear() })));
   if (meta.childNodes.length) body.appendChild(meta);
 
-  const kids = [];
-  if (it.logo) kids.push(el("img", { class: "logo", src: it.logo, alt: "", loading: "lazy", onerror: function () { this.remove(); } }));
-  kids.push(body);
-
   const key = it.slug || it.id;
   return el("a", {
     class: "card" + (isNews ? " news" : ""),
     href: `/breach/${encodeURIComponent(key)}`,
     onclick: (e) => { e.preventDefault(); go(key); },
-  }, ...kids);
+  }, body);
 }
 
 function renderDetail(key) {
@@ -278,8 +274,6 @@ function renderDetail(key) {
   }
 
   const isNews = it.sourceType === "news";
-  const head = el("div", { class: "detail-head" });
-  if (it.logo) head.appendChild(el("img", { class: "logo", src: it.logo, alt: "", onerror: function () { this.remove(); } }));
 
   const meta = el("div", { class: "detail-meta" });
   meta.appendChild(el("span", { class: "pill" }, el("b", { text: it.source })));
@@ -289,9 +283,7 @@ function renderDetail(key) {
   if (it.affected) meta.appendChild(el("span", { class: "pill danger" }, el("b", { text: fmtNum(it.affected) }), " accounts"));
   if (it.domain) meta.appendChild(el("span", { class: "pill" }, el("b", { text: it.domain })));
 
-  head.appendChild(el("div", {}, el("h1", { text: it.title }), meta));
-
-  const detail = el("div", { class: "detail" }, head);
+  const detail = el("div", { class: "detail" }, el("h1", { text: it.title }), meta);
 
   if (it.tags && it.tags.length) {
     detail.appendChild(el("div", { class: "section-title", text: "What was exposed" }));

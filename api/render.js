@@ -57,12 +57,11 @@ const yearOf = (it) => String(it.occurred || it.published || "").slice(0, 4);
 // ---------- markup ----------
 function cardHTML(it) {
   const isNews = it.sourceType === "news";
-  const logo = it.logo ? `<img class="logo" src="${esc(it.logo)}" alt="" loading="lazy" />` : "";
   const bits = [];
   if (it.affected) bits.push(`<span><b>${esc(fmtNum(it.affected))}</b> accounts affected</span>`);
   if (it.occurred) bits.push(`<span>Occurred <b>${new Date(it.occurred).getFullYear()}</b></span>`);
   const meta = bits.length ? `<div class="meta">${bits.join("")}</div>` : "";
-  return `<a class="card${isNews ? " news" : ""}" href="/breach/${esc(it.slug || it.id)}">${logo}<div class="card-body"><div class="card-top"><span class="badge${isNews ? " news" : ""}">${isNews ? "News" : "Breach"}</span><span class="src">${esc(it.source)}</span><span class="time">${esc(relTime(it.published))}</span></div><h3>${esc(it.title)}</h3><p>${esc(it.summary || "")}</p>${meta}</div></a>`;
+  return `<a class="card${isNews ? " news" : ""}" href="/breach/${esc(it.slug || it.id)}"><div class="card-body"><div class="card-top"><span class="badge${isNews ? " news" : ""}">${isNews ? "News" : "Breach"}</span><span class="src">${esc(it.source)}</span><span class="time">${esc(relTime(it.published))}</span></div><h3>${esc(it.title)}</h3><p>${esc(it.summary || "")}</p>${meta}</div></a>`;
 }
 
 function listHTML(items) {
@@ -186,7 +185,6 @@ function relatedHTML(it, items) {
 
 function detailMain(it, items) {
   const isNews = it.sourceType === "news";
-  const logo = it.logo ? `<img class="logo" src="${esc(it.logo)}" alt="" />` : "";
   const pills = [`<span class="pill"><b>${esc(it.source)}</b></span>`,
     `<span class="pill${isNews ? "" : " danger"}">${isNews ? "News report" : "Confirmed breach"}</span>`];
   if (it.published) pills.push(`<span class="pill">Added <b>${esc(fmtDate(it.published))}</b></span>`);
@@ -206,7 +204,7 @@ function detailMain(it, items) {
     ? `<div class="section-title">Frequently asked questions</div><div class="faq">${it.faq.map((f) => `<div class="faq-item"><h3 class="faq-q">${esc(f.q)}</h3><p class="faq-a">${esc(f.a)}</p></div>`).join("")}</div>`
     : "";
 
-  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><div class="detail-head">${logo}<div><h1>${esc(it.title)}</h1><div class="detail-meta">${pills.join("")}</div></div></div>${exposed}${advice}${protect}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
+  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><h1>${esc(it.title)}</h1><div class="detail-meta">${pills.join("")}</div>${exposed}${advice}${protect}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
 }
 
 // ---------- SEO surface pages ----------
