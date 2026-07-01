@@ -566,15 +566,15 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   padding: 5px 12px; border-radius: var(--r-md); font-size: 13px;
 }
 
-/* CTA */
-.cta {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 34px;
-  background: var(--accent); color: var(--text-on-accent); font-weight: 600; font-size: 14px;
-  font-family: var(--font-body); padding: 12px 20px; border: 1px solid var(--accent); border-radius: var(--r-md);
-  box-shadow: var(--shadow-sm); transition: background 140ms ease, transform 120ms ease;
+/* Outbound source attribution: a quiet text link, deliberately NOT a filled
+   button — the only filled button on a breach page is the Literal CTA. */
+.source-link {
+  display: inline-block; margin-top: 30px;
+  color: var(--text-secondary); font-size: 13.5px; font-weight: 500;
+  transition: color 140ms ease, opacity 120ms ease;
 }
-.cta:hover { background: var(--accent-hover); }
-.cta:active { transform: scale(0.98); }
+.source-link:hover { color: var(--text-primary); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.source-link:active { opacity: 0.55; }
 
 /* ---------- Literal funnel CTA ---------- */
 .protect-cta {

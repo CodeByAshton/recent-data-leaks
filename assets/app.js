@@ -414,8 +414,8 @@ function renderDetail(key) {
   }
 
   detail.appendChild(el("a", {
-    class: "cta" + (isNews ? " news" : ""), href: it.url, target: "_blank", rel: "noopener noreferrer",
-  }, isNews ? "Read full report ↗" : "View on source ↗"));
+    class: "source-link", href: it.url, target: "_blank", rel: "noopener noreferrer",
+  }, (isNews ? `Read the full report on ${it.source}` : `View the original record on ${it.source}`) + " ↗"));
 
   // Related breaches by shared exposed-data tags, then same year (mirrors
   // render.js relatedHTML). Plain links (full navigation) so breaches outside

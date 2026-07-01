@@ -296,7 +296,7 @@ function detailMain(it, items) {
   const companyLink = !isNews
     ? `<a class="meta-link" href="/company/${esc(companySlug(it))}">All ${esc(it.title)} breaches &rarr;</a>`
     : "";
-  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><h1>${esc(it.title)}</h1><div class="props">${pills.join("")}</div>${companyLink}${exposed}${advice}${protect}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
+  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><h1>${esc(it.title)}</h1><div class="props">${pills.join("")}</div>${companyLink}${exposed}${advice}${protect}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="source-link" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? `Read the full report on ${esc(it.source)}` : `View the original record on ${esc(it.source)}`} &#8599;</a>${relatedHTML(it, items)}</div>`;
 }
 
 // ---------- SEO surface pages ----------
