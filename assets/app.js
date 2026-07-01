@@ -127,9 +127,11 @@ function render() {
     // we actually have the item loaded.
     const it = FEED.items.find((x) => x.slug === id || x.id === id);
     if (!navigated || !it) return;
+    app.classList.add("read");
     app.innerHTML = "";
     renderDetail(id);
   } else {
+    app.classList.remove("read");
     app.innerHTML = "";
     renderList();
   }

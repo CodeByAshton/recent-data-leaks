@@ -268,7 +268,7 @@ function builtMain(feed) {
 }
 
 // ---------- document ----------
-function page({ title, description, canonical, robots, ogType, image, jsonld, main, publishedTime, modifiedTime }) {
+function page({ title, description, canonical, robots, ogType, image, jsonld, main, publishedTime, modifiedTime, narrow }) {
   const verify = [
     process.env.GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${esc(process.env.GOOGLE_SITE_VERIFICATION)}" />` : "",
     process.env.BING_SITE_VERIFICATION ? `<meta name="msvalidate.01" content="${esc(process.env.BING_SITE_VERIFICATION)}" />` : "",
@@ -315,7 +315,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <body>
 <a class="skip" href="#app">Skip to content</a>
 <header class="topbar"><div class="wrap"><div class="brandblock"><a class="brand" href="/">${BRAND}</a>${BYLINE}</div><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="themeToggle" class="ghost-btn icon-btn" type="button" aria-label="Toggle dark mode"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
-<main class="wrap" id="app">${main}</main>
+<main class="wrap${narrow ? " read" : ""}" id="app">${main}</main>
 <footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/how-its-built">How it&#39;s built</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/assets/app.js"></script>
@@ -398,6 +398,7 @@ module.exports = async function handler(req, res) {
         publishedTime: it.published || undefined,
         modifiedTime: it.published || undefined,
         jsonld: ld,
+        narrow: true,
         main: detailMain(it, feed.items),
       });
     }
@@ -474,6 +475,7 @@ module.exports = async function handler(req, res) {
         description: g.short,
         canonical: `${SITE}/glossary/${g.slug}`,
         jsonld: jsonLd({ "@context": "https://schema.org", "@type": "DefinedTerm", name: g.term, description: g.body, inDefinedTermSet: `${SITE}/glossary` }),
+        narrow: true,
         main: glossaryTermMain(g),
       });
     } else {
@@ -497,6 +499,7 @@ module.exports = async function handler(req, res) {
       title: `About — ${NAME}`,
       description: "About Recent Data Leaks: a live timeline of public data breaches built to help people see who was breached, what was exposed, and what to do.",
       canonical: `${SITE}/about`,
+      narrow: true,
       main: aboutMain(),
     });
   } else if (view === "methodology") {
@@ -504,6 +507,7 @@ module.exports = async function handler(req, res) {
       title: `Methodology — ${NAME}`,
       description: "How Recent Data Leaks collects and normalizes breach data: its sources, refresh cadence, news filtering, and limitations.",
       canonical: `${SITE}/methodology`,
+      narrow: true,
       main: methodologyMain(feed),
     });
   } else if (view === "built") {
