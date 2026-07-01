@@ -179,6 +179,8 @@ body::before {
 /* Reading pages (breach detail, prose) use a narrower column, centered so the
    left/right margins stay equal instead of hugging the left of the wide wrap. */
 .wrap.read { max-width: var(--read); }
+/* On prose pages the heading shouldn't float with a big gap above it. */
+.wrap.read .hero { padding: 24px 0 8px; }
 a { color: inherit; text-decoration: none; }
 
 ::selection { background: var(--accent); color: var(--text-on-accent); }

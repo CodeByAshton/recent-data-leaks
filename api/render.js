@@ -11,6 +11,9 @@ const SITE = "https://recentdataleaks.com";
 const NAME = "Recent Data Leaks";
 // Recent Data Leaks is a Literal property; this is the funnel target.
 const LITERAL = "https://literal.so";
+// Cache-busting token for static assets: changes every deploy (Vercel sets the
+// commit SHA), so an updated styles.css/app.js is never served stale from cache.
+const ASSET_VER = (process.env.VERCEL_GIT_COMMIT_SHA || "dev").slice(0, 8);
 // Each word in its own span so the brand can stack one-per-line on mobile.
 const BRAND = NAME.split(" ").map((w) => `<span>${w}</span>`).join(" ");
 const TAGLINE = "A live timeline of data breaches";
@@ -314,7 +317,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/assets/styles.css" />
+<link rel="stylesheet" href="/assets/styles.css?v=${ASSET_VER}" />
 </head>
 <body>
 <a class="skip" href="#app">Skip to content</a>
@@ -322,7 +325,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <main class="wrap${narrow ? " read" : ""}" id="app">${main}</main>
 <footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/how-its-built">How it&#39;s built</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script defer src="/_vercel/insights/script.js"></script>
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js?v=${ASSET_VER}"></script>
 </body>
 </html>`;
 }
