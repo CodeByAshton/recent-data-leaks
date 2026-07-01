@@ -366,7 +366,14 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .search:focus { border-color: var(--border-focus); box-shadow: var(--shadow-glow-focus); }
 .search::placeholder { color: var(--text-placeholder); }
 
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; align-items: center; }
+/* Second row: individual sources — smaller and quieter than the type row
+   (the contrast does the grouping; the row is labeled for screen readers),
+   compact enough to sit on one line at the full content width. */
+.chips + .chips { margin-top: 10px; gap: 5px; }
+.chips-src .chip { font-size: 11.5px; padding: 4px 8px; color: var(--text-tertiary); }
+.chips-src .chip:hover { color: var(--text-primary); }
+.chips-src .chip.active { color: var(--text-on-accent); }
 .chip {
   background: var(--bg-card); border: 1px solid var(--border-subtle); cursor: pointer; padding: 6px 13px;
   font-family: var(--font-body); font-size: 13px; color: var(--text-secondary);

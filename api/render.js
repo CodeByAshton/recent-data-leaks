@@ -114,13 +114,17 @@ function yearNavHTML(items) {
 
 // Labels for the source filter chips; mirrors app.js so the server-rendered
 // controls match the hydrated ones and the layout doesn't shift on load.
+// Two visually distinct rows: the type filter, then a quieter labeled row of
+// individual sources — one flat row of nine chips wrapped into a ragged blob.
 const SOURCE_LABELS = { all: "All", breach: "Confirmed breaches", news: "News" };
 function controlsHTML(feed) {
-  const sources = ["all", "breach", "news", ...(feed.sources || [])];
-  const chips = sources
-    .map((s) => `<button class="chip${s === "all" ? " active" : ""}" type="button">${esc(SOURCE_LABELS[s] || s)}</button>`)
+  const typeChips = ["all", "breach", "news"]
+    .map((s) => `<button class="chip${s === "all" ? " active" : ""}" type="button">${SOURCE_LABELS[s]}</button>`)
     .join("");
-  return `<div class="controls"><input class="search" type="search" placeholder="Search breaches, companies, sources&hellip;" aria-label="Search breaches" value="" /></div><div class="chips">${chips}</div>`;
+  const srcChips = (feed.sources || [])
+    .map((s) => `<button class="chip" type="button">${esc(s)}</button>`)
+    .join("");
+  return `<div class="controls"><input class="search" type="search" placeholder="Search breaches, companies, sources&hellip;" aria-label="Search breaches" value="" /></div><div class="chips" role="group" aria-label="Filter by type">${typeChips}</div><div class="chips chips-src" role="group" aria-label="Filter by source">${srcChips}</div>`;
 }
 
 // First page of the timeline; the hydrated client reveals the rest 15 at a

@@ -181,17 +181,20 @@ function renderList(noAnim) {
   });
   app.appendChild(el("div", { class: "controls" }, search));
 
-  const sources = ["all", "breach", "news", ...(FEED.sources || [])];
+  // Two chip rows (mirrors render.js controlsHTML): type filter, then a
+  // quieter labeled row of individual sources. Same single-select semantics.
   const labels = { all: "All", breach: "Confirmed breaches", news: "News" };
-  const chips = el("div", { class: "chips" });
-  sources.forEach((s) => {
-    chips.appendChild(el("button", {
-      class: "chip" + (filter.source === s ? " active" : ""),
-      text: labels[s] || s,
-      onclick: () => { filter.source = s; render(); },
-    }));
+  const chipFor = (s) => el("button", {
+    class: "chip" + (filter.source === s ? " active" : ""),
+    text: labels[s] || s,
+    onclick: () => { filter.source = s; render(); },
   });
-  app.appendChild(chips);
+  const typeChips = el("div", { class: "chips", role: "group", "aria-label": "Filter by type" });
+  ["all", "breach", "news"].forEach((s) => typeChips.appendChild(chipFor(s)));
+  app.appendChild(typeChips);
+  const srcChips = el("div", { class: "chips chips-src", role: "group", "aria-label": "Filter by source" });
+  (FEED.sources || []).forEach((s) => srcChips.appendChild(chipFor(s)));
+  app.appendChild(srcChips);
 
   // Prefer the full year list from the API (matches the server-rendered nav);
   // fall back to deriving from loaded items.
