@@ -74,8 +74,10 @@
   --font-display: "Inter Tight", "Inter", ui-sans-serif, sans-serif;
 
   /* ---- Layout ---- */
-  --max: 1000px;
-  --read: 680px;
+  /* One consistent content width for every page (header, footer, and main),
+     so pages never change width or shift alignment as you navigate. */
+  --max: 760px;
+  --read: 760px;
 
   /* legacy aliases (mapped to the token set) */
   --bg: var(--bg-app);
