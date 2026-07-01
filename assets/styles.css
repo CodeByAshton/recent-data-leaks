@@ -217,12 +217,16 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-tertiary); display: inline-block; }
 .dot.live { background: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.16); }
 
+/* Buttons follow the Literal interaction spec (.onb-skip-row__next): background
+   settles in 140ms, a 120ms transform, and a scale(0.98) press on :active. */
 .ghost-btn {
   background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text-primary);
   cursor: pointer; font-family: var(--font-body); font-size: 13px; padding: 7px 14px;
-  border-radius: var(--r-md); transition: .15s; line-height: 1; box-shadow: var(--shadow-xs);
+  border-radius: var(--r-md); line-height: 1; box-shadow: var(--shadow-xs);
+  transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
 }
 .ghost-btn:hover { background: var(--bg-hover); border-color: var(--border-standard); }
+.ghost-btn:active { transform: scale(0.97); }
 
 /* Icon buttons (theme toggle) */
 .icon-btn { padding: 7px; width: 34px; height: 32px; display: inline-flex; align-items: center; justify-content: center; }
@@ -237,7 +241,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   display: none; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px; width: 36px; height: 36px; padding: 0; cursor: pointer;
   background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--r-md);
+  transition: background 140ms ease, transform 120ms ease;
 }
+.navtoggle:active { transform: scale(0.94); }
 .navtoggle span { width: 16px; height: 1.5px; background: var(--text-primary); transition: transform .2s, opacity .2s; }
 .navtoggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
 .navtoggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
@@ -259,14 +265,18 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   border: 1px solid var(--border-subtle); border-radius: var(--r-full); background: var(--bg-card);
   box-shadow: var(--shadow-xs); transition: .15s;
 }
+.yn-window a { transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 120ms ease; }
 .yn-window a:hover { color: var(--text-primary); border-color: var(--border-standard); background: var(--bg-hover); }
+.yn-window a:active { transform: scale(0.96); }
 .yn-btn {
   flex: none; width: 28px; height: 28px; padding: 0; line-height: 1; font-size: 15px;
   background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary);
-  border-radius: var(--r-full); cursor: pointer; transition: .15s; box-shadow: var(--shadow-xs);
+  border-radius: var(--r-full); cursor: pointer; box-shadow: var(--shadow-xs);
+  transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
 }
 .yn-btn:hover:not(:disabled) { border-color: var(--border-standard); background: var(--bg-hover); }
-.yn-btn:disabled { opacity: .35; cursor: default; }
+.yn-btn:active:not(:disabled) { transform: scale(0.94); }
+.yn-btn:disabled { opacity: .4; cursor: default; }
 
 .controls { margin: 38px 0 0; }
 .search {
@@ -282,9 +292,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .chip {
   background: var(--bg-card); border: 1px solid var(--border-subtle); cursor: pointer; padding: 6px 13px;
   font-family: var(--font-body); font-size: 13px; color: var(--text-secondary);
-  border-radius: var(--r-full); transition: .15s; box-shadow: var(--shadow-xs);
+  border-radius: var(--r-full); box-shadow: var(--shadow-xs);
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 120ms ease;
 }
 .chip:hover { color: var(--text-primary); background: var(--bg-hover); }
+.chip:active { transform: scale(0.96); }
 .chip.active { color: var(--text-on-accent); background: var(--accent); border-color: var(--accent); font-weight: 500; }
 
 /* ---------- Timeline (glass tiles) ---------- */
@@ -350,8 +362,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .pill b { color: var(--text-primary); font-weight: 600; }
 .pill.danger { background: var(--accent); color: var(--text-on-accent); border-color: var(--accent); }
 .pill.danger b { color: var(--text-on-accent); }
-.pill-link { background: var(--bg-card); box-shadow: var(--shadow-xs); transition: .15s; }
+.pill-link { background: var(--bg-card); box-shadow: var(--shadow-xs); transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 120ms ease; }
 .pill-link:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-standard); }
+.pill-link:active { transform: scale(0.98); }
 
 .section-title {
   font-size: 11.5px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-tertiary);
@@ -421,10 +434,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .cta {
   display: inline-flex; align-items: center; gap: 8px; margin-top: 34px;
   background: var(--accent); color: var(--text-on-accent); font-weight: 600; font-size: 14px;
-  font-family: var(--font-body); padding: 12px 20px; border-radius: var(--r-md); transition: .15s;
-  box-shadow: var(--shadow-sm);
+  font-family: var(--font-body); padding: 12px 20px; border: 1px solid var(--accent); border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm); transition: background 140ms ease, transform 120ms ease;
 }
-.cta:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.cta:hover { background: var(--accent-hover); }
+.cta:active { transform: scale(0.98); }
 
 /* ---------- States ---------- */
 .loading, .empty { text-align: center; color: var(--text-secondary); padding: 80px 0; font-size: 16px; font-family: var(--font-display); }
