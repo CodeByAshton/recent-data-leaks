@@ -83,13 +83,24 @@ function yearNavHTML(items) {
   return `<nav class="yearnav" aria-label="Browse by year"><span class="yn-label">Browse by year:</span><button class="yn-btn" type="button" aria-label="Previous years" disabled>&lsaquo;</button><span class="yn-window">${win}</span><button class="yn-btn" type="button" aria-label="Next years"${nextDisabled}>&rsaquo;</button></nav>`;
 }
 
+// Labels for the source filter chips; mirrors app.js so the server-rendered
+// controls match the hydrated ones and the layout doesn't shift on load.
+const SOURCE_LABELS = { all: "All", breach: "Confirmed breaches", news: "News" };
+function controlsHTML(feed) {
+  const sources = ["all", "breach", "news", ...(feed.sources || [])];
+  const chips = sources
+    .map((s) => `<button class="chip${s === "all" ? " active" : ""}" type="button">${esc(SOURCE_LABELS[s] || s)}</button>`)
+    .join("");
+  return `<div class="controls"><input class="search" type="search" placeholder="Search breaches, companies, sources&hellip;" aria-label="Search breaches" value="" /></div><div class="chips">${chips}</div>`;
+}
+
 const HOME_LIMIT = 80;
 function homeMain(feed) {
   const recent = feed.items.slice(0, HOME_LIMIT);
   const more = feed.count > HOME_LIMIT
     ? `<p class="more-note">Showing the ${HOME_LIMIT} most recent of ${feed.count} tracked incidents. <a href="/stats">See statistics</a> or browse by year above.</p>`
     : "";
-  return `<section class="hero"><h1>${esc(TAGLINE)}</h1><p><span class="count">${feed.count}</span> tracked incidents &middot; newest first</p>${yearNavHTML(feed.items)}</section>${listHTML(recent)}${more}`;
+  return `<section class="hero"><h1>${esc(TAGLINE)}</h1><p><span class="count">${feed.count}</span> tracked incidents &middot; newest first</p>${yearNavHTML(feed.items)}</section>${controlsHTML(feed)}${listHTML(recent)}${more}`;
 }
 
 function statsMain(feed) {

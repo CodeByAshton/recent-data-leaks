@@ -24,7 +24,11 @@ module.exports = async function handler(req, res) {
     ...years.map((y) => `  <url><loc>${SITE}/year/${y}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>`),
     ...companies.map((c) => `  <url><loc>${SITE}/company/${c}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`),
     ...feed.items.map((it) => {
-      const lastmod = it.published ? `<lastmod>${new Date(it.published).toISOString()}</lastmod>` : "";
+      let lastmod = "";
+      if (it.published) {
+        const d = new Date(it.published);
+        if (!isNaN(d.getTime())) lastmod = `<lastmod>${d.toISOString()}</lastmod>`;
+      }
       return `  <url><loc>${SITE}/breach/${it.slug || it.id}</loc>${lastmod}<changefreq>weekly</changefreq><priority>0.7</priority></url>`;
     }),
   ];

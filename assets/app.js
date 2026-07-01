@@ -9,6 +9,10 @@ const liveDot = document.getElementById("liveDot");
 
 let FEED = null;
 let filter = { source: "all", q: "" };
+// True once the user has navigated inside the SPA. On a direct load/reload the
+// server-rendered detail page is complete (full details, works for the whole
+// catalog), so we leave it untouched and only take over after in-app navigation.
+let navigated = false;
 
 // ---------- Data ----------
 async function loadFeed() {
@@ -97,19 +101,31 @@ function isManagedRoute() {
 }
 function go(key) {
   const url = key ? `/breach/${encodeURIComponent(key)}` : "/";
+  navigated = true;
   history.pushState({ key: key || null }, "", url);
   render();
 }
-window.addEventListener("popstate", render);
+window.addEventListener("popstate", () => { navigated = true; render(); });
 
 // ---------- Views ----------
 function render() {
   if (!FEED) return;
   if (!isManagedRoute()) return; // leave server-rendered archive pages alone
   const id = routeId();
-  app.innerHTML = "";
-  if (id) renderDetail(id);
-  else renderList();
+  if (id) {
+    // The light feed carries only the recent window and no `details` body, so a
+    // client re-render of a breach page is strictly worse than the server one
+    // (and empty for anything outside that window). On first paint leave the SSR
+    // content in place; only re-render once the user navigates within the SPA and
+    // we actually have the item loaded.
+    const it = FEED.items.find((x) => x.slug === id || x.id === id);
+    if (!navigated || !it) return;
+    app.innerHTML = "";
+    renderDetail(id);
+  } else {
+    app.innerHTML = "";
+    renderList();
+  }
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
 }
 

@@ -28,8 +28,10 @@ export default async function handler(req) {
   let item = null;
   if (id) {
     try {
-      const feed = await (await fetch(`${origin}/api/feed`)).json();
-      item = feed.items.find((x) => x.slug === id || x.id === id);
+      // Ask the feed for this specific breach so any page in the catalog gets a
+      // real per-breach card, not just the recent window.
+      const feed = await (await fetch(`${origin}/api/feed?id=${encodeURIComponent(id)}`)).json();
+      item = (feed.items || []).find((x) => x.slug === id || x.id === id);
     } catch (_) { /* fall through to generic card */ }
   }
 
