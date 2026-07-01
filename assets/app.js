@@ -189,7 +189,8 @@ function refreshList() {
 // Paged year nav: shows a window of years with prev/next buttons instead of
 // listing all of them (which wrapped and broke the mobile layout).
 function buildYearNav(years) {
-  const page = (window.matchMedia && window.matchMedia("(max-width: 640px)").matches) ? 4 : 7;
+  const mq = (q) => window.matchMedia && window.matchMedia(q).matches;
+  const page = mq("(max-width: 400px)") ? 3 : mq("(max-width: 640px)") ? 4 : 7;
   let offset = 0;
   const label = el("span", { class: "yn-label", text: "Browse by year:" });
   const prev = el("button", { class: "yn-btn", type: "button", "aria-label": "Previous years" }, "‹");

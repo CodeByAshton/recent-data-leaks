@@ -33,6 +33,14 @@ function esc(s) {
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 const jsonLd = (obj) => JSON.stringify(obj).replace(/</g, "\\u003c");
+// Breadcrumb (Home -> current page) so search results can show a breadcrumb trail.
+const crumbs = (name, url) => ({
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: NAME, item: `${SITE}/` },
+    { "@type": "ListItem", position: 2, name, item: url },
+  ],
+});
 function fmtNum(n) { return n == null ? null : n.toLocaleString("en-US"); }
 function fmtDate(iso) {
   if (!iso) return null;
@@ -413,10 +421,10 @@ module.exports = async function handler(req, res) {
     const items = feed.items.filter((x) => yearOf(x) === year);
     const ld = jsonLd({
       "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      name: `Data breaches in ${year}`,
-      url: `${SITE}/year/${year}`,
-      description: `Public data breaches recorded in ${year}.`,
+      "@graph": [
+        { "@type": "CollectionPage", name: `Data breaches in ${year}`, url: `${SITE}/year/${year}`, description: `Public data breaches recorded in ${year}.` },
+        crumbs(`Data breaches in ${year}`, `${SITE}/year/${year}`),
+      ],
     });
     html = page({
       title: `Data breaches in ${year} — ${NAME}`,
@@ -442,12 +450,17 @@ module.exports = async function handler(req, res) {
       const name = cItems[0].title;
       const ld = jsonLd({
         "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: [{
-          "@type": "Question",
-          name: `Has ${name} had a data breach?`,
-          acceptedAnswer: { "@type": "Answer", text: `${name} appears in ${cItems.length} tracked breach${cItems.length > 1 ? "es" : ""}.` },
-        }],
+        "@graph": [
+          {
+            "@type": "FAQPage",
+            mainEntity: [{
+              "@type": "Question",
+              name: `Has ${name} had a data breach?`,
+              acceptedAnswer: { "@type": "Answer", text: `${name} appears in ${cItems.length} tracked breach${cItems.length > 1 ? "es" : ""}.` },
+            }],
+          },
+          crumbs(`Has ${name} had a data breach?`, `${SITE}/company/${company}`),
+        ],
       });
       html = page({
         title: `Has ${name} had a data breach? — ${NAME}`,
@@ -462,7 +475,10 @@ module.exports = async function handler(req, res) {
       title: `The biggest data breaches of all time — ${NAME}`,
       description: "The largest known data breaches ranked by number of accounts affected, with what was exposed and links to each incident.",
       canonical: `${SITE}/biggest-data-breaches`,
-      jsonld: jsonLd({ "@context": "https://schema.org", "@type": "CollectionPage", name: "The biggest data breaches of all time", url: `${SITE}/biggest-data-breaches` }),
+      jsonld: jsonLd({ "@context": "https://schema.org", "@graph": [
+        { "@type": "CollectionPage", name: "The biggest data breaches of all time", url: `${SITE}/biggest-data-breaches` },
+        crumbs("The biggest data breaches of all time", `${SITE}/biggest-data-breaches`),
+      ] }),
       main: biggestMain(feed),
     });
   } else if (view === "glossary") {
@@ -481,7 +497,10 @@ module.exports = async function handler(req, res) {
         title: `${g.term} — ${NAME}`,
         description: g.short,
         canonical: `${SITE}/glossary/${g.slug}`,
-        jsonld: jsonLd({ "@context": "https://schema.org", "@type": "DefinedTerm", name: g.term, description: g.body, inDefinedTermSet: `${SITE}/glossary` }),
+        jsonld: jsonLd({ "@context": "https://schema.org", "@graph": [
+          { "@type": "DefinedTerm", name: g.term, description: g.body, inDefinedTermSet: `${SITE}/glossary` },
+          crumbs(g.term, `${SITE}/glossary/${g.slug}`),
+        ] }),
         narrow: true,
         main: glossaryTermMain(g),
       });
@@ -498,7 +517,10 @@ module.exports = async function handler(req, res) {
       title: `Data breach statistics — ${NAME}`,
       description: "Live statistics on the data breaches tracked by Recent Data Leaks: total incidents, accounts exposed, breaches by year, and the most commonly exposed data.",
       canonical: `${SITE}/stats`,
-      jsonld: jsonLd({ "@context": "https://schema.org", "@type": "CollectionPage", name: "Data breach statistics", url: `${SITE}/stats`, description: "Statistics on tracked public data breaches." }),
+      jsonld: jsonLd({ "@context": "https://schema.org", "@graph": [
+        { "@type": "CollectionPage", name: "Data breach statistics", url: `${SITE}/stats`, description: "Statistics on tracked public data breaches." },
+        crumbs("Data breach statistics", `${SITE}/stats`),
+      ] }),
       main: statsMain(feed),
     });
   } else if (view === "about") {
