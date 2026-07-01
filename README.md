@@ -153,9 +153,10 @@ Vercel → Settings → Environment Variables. The meta tags appear automaticall
 - HTML pages: `s-maxage=900, stale-while-revalidate=3600`.
 - `/api/feed`: same.
 - `/api/og`: `s-maxage=86400`.
-- A Vercel Cron (`vercel.json` → `crons`) pings `/api/feed` hourly to keep the
-  cache warm without traffic. **Frequency depends on your Vercel plan** — Hobby
-  may limit crons; adjust the schedule if needed.
+- A Vercel Cron (`vercel.json` → `crons`) pings `/api/feed` daily to keep the
+  cache warm without traffic. **Frequency depends on your Vercel plan** — the
+  Hobby plan only allows once-daily crons (`0 0 * * *`); on Pro you can raise it
+  to hourly (`0 * * * *`).
 
 ---
 
