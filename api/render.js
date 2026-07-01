@@ -253,17 +253,34 @@ function relatedHTML(it, items) {
   return `<div class="section-title">Related breaches</div><ul class="related">${pool.map((r) => `<li><a href="/breach/${esc(r.slug || r.id)}">${esc(r.title)}</a><span class="rel-src">${esc(r.source)}</span></li>`).join("")}</ul>`;
 }
 
+// Feather-style 15px stroke icons for the property labels (keep in sync with
+// PROP_ICONS in assets/app.js).
+const PROP_ICONS = {
+  source: `<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13.5 13.5 0 0 1 0 18M12 3a13.5 13.5 0 0 0 0 18"/>`,
+  status: `<path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/>`,
+  added: `<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/>`,
+  occurred: `<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>`,
+  accounts: `<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.5-5.5 6-5.5s6 2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.5.3 4 2 4 4.5"/>`,
+  domain: `<path d="M10 14a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 5.93M14 10a5 5 0 0 0-7.07 0L4.8 12.12a5 5 0 0 0 7.07 7.07L13 18.07"/>`,
+};
+const propIcon = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PROP_ICONS[k]}</svg>`;
+
 function detailMain(it, items) {
   const isNews = it.sourceType === "news";
-  // One editorial meta line (middot-separated) instead of a row of pills;
-  // the company hub link sits on its own line below it.
-  const pills = [`<span class="meta-item"><b>${esc(it.source)}</b></span>`,
-    `<span class="meta-item${isNews ? "" : " danger"}">${isNews ? "News report" : "Confirmed breach"}</span>`];
-  if (it.published) pills.push(`<span class="meta-item">Added <b>${esc(fmtDate(it.published))}</b></span>`);
-  if (it.occurred) pills.push(`<span class="meta-item">Occurred <b>${esc(fmtDate(it.occurred))}</b></span>`);
-  if (it.affected) pills.push(`<span class="meta-item danger"><b>${esc(fmtNum(it.affected))}</b> accounts</span>`);
-  if (it.domain) pills.push(`<span class="meta-item"><b>${esc(it.domain)}</b></span>`);
-  if (!isNews) pills.push(`<a class="meta-link" href="/company/${esc(companySlug(it))}">All ${esc(it.title)} breaches &rarr;</a>`);
+  // Notion-style property rows (icon + label + value) instead of a pill row;
+  // the company hub link sits on its own line below them.
+  const prop = (icon, label, value) =>
+    `<div class="prop"><span class="prop-label">${propIcon(icon)}${label}</span><span class="prop-value">${value}</span></div>`;
+  const pills = [
+    prop("source", "Source", `<b>${esc(it.source)}</b>`),
+    prop("status", "Status", isNews
+      ? `<span class="prop-tag news">News report</span>`
+      : `<span class="prop-tag danger">Confirmed breach</span>`),
+  ];
+  if (it.published) pills.push(prop("added", "Added", esc(fmtDate(it.published))));
+  if (it.occurred) pills.push(prop("occurred", "Occurred", esc(fmtDate(it.occurred))));
+  if (it.affected) pills.push(prop("accounts", "Accounts affected", `<b class="danger">${esc(fmtNum(it.affected))}</b>`));
+  if (it.domain) pills.push(prop("domain", "Domain", esc(it.domain)));
 
   const exposed = (it.tags && it.tags.length)
     ? `<div class="section-title">What was exposed</div><div class="exposed">${it.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>`
@@ -276,7 +293,10 @@ function detailMain(it, items) {
     ? `<div class="section-title">Frequently asked questions</div><div class="faq">${it.faq.map((f) => `<div class="faq-item"><h3 class="faq-q">${esc(f.q)}</h3><p class="faq-a">${esc(f.a)}</p></div>`).join("")}</div>`
     : "";
 
-  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><h1>${esc(it.title)}</h1><div class="detail-meta">${pills.join("")}</div>${exposed}${advice}${protect}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
+  const companyLink = !isNews
+    ? `<a class="meta-link" href="/company/${esc(companySlug(it))}">All ${esc(it.title)} breaches &rarr;</a>`
+    : "";
+  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><h1>${esc(it.title)}</h1><div class="props">${pills.join("")}</div>${companyLink}${exposed}${advice}${protect}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
 }
 
 // ---------- SEO surface pages ----------

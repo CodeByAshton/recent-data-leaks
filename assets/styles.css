@@ -44,6 +44,7 @@
   --glass-fill:        rgba(255,255,255,0.62);
   --glass-fill-strong: rgba(255,255,255,0.78);
   --edge-hi:           rgba(255,255,255,0.75);
+  --bg-app-glass:      rgba(237,238,239,0.80); /* --bg-app at 80% for sticky strips */
 
   /* ---- Semantic (breach = danger accent) ---- */
   --error:        #dc2626;
@@ -129,6 +130,7 @@
   --glass-fill:        rgba(255,255,255,0.05);
   --glass-fill-strong: rgba(28,28,28,0.72);
   --edge-hi:           rgba(255,255,255,0.06);
+  --bg-app-glass:      rgba(17,17,17,0.80);
 
   --error:        #ef4444;
   --error-text:   #fca5a5;
@@ -334,8 +336,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 }
 .hero p { margin: 0; color: var(--text-secondary); font-size: 16px; }
 .hero .count { color: var(--text-primary); font-weight: 600; }
-/* Sits with the other browse controls (below search + chips). */
-.yearnav { margin: 18px 0 0; display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+/* Sits with the other browse controls (below search + chips), on the same
+   vertical rhythm as the filter rows. */
+.yearnav { margin: 2px 0 0; display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
 .yn-label { flex: none; color: var(--text-secondary); font-size: 13px; }
 .yn-window { display: flex; gap: 8px; overflow: hidden; }
 /* Years are quiet text links (boxes are reserved for content). */
@@ -346,13 +349,15 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 }
 .yn-window a:hover { color: var(--text-primary); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .yn-window a:active { opacity: 0.55; }
+/* The pager chevrons stay real buttons — they're actions, not links. */
 .yn-btn {
-  flex: none; width: 26px; height: 26px; padding: 0; line-height: 1; font-size: 16px;
-  background: none; border: 0; color: var(--text-tertiary); cursor: pointer;
-  transition: color 140ms ease, transform 120ms ease;
+  flex: none; width: 26px; height: 26px; padding: 0; line-height: 1; font-size: 15px;
+  background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text-primary);
+  border-radius: var(--r-md); cursor: pointer; box-shadow: var(--shadow-xs);
+  transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
 }
-.yn-btn:hover:not(:disabled) { color: var(--text-primary); }
-.yn-btn:active:not(:disabled) { transform: scale(0.88); }
+.yn-btn:hover:not(:disabled) { background: var(--bg-hover); border-color: var(--border-standard); }
+.yn-btn:active:not(:disabled) { transform: scale(0.92); }
 .yn-btn:disabled { opacity: .35; cursor: default; }
 
 /* Search is typographic: a hairline underline, not another boxed surface —
@@ -378,11 +383,14 @@ a:focus-visible, button:focus-visible, input:focus-visible {
    content. The active segment carries an accent underline (same language as
    the topnav). Type row and source row are independent dimensions; the
    source row is smaller and quieter. */
-.chips { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 16px 0 0; align-items: center; }
+/* The control lines (search, type row, source row, year row) share one
+   vertical rhythm: 6px internal padding + these margins = an even ~14px
+   visual gap between every line. */
+.chips { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 8px 0 0; align-items: center; }
 .chips + .chips { margin-top: 2px; gap: 4px 16px; }
 .chip {
   position: relative; background: none; border: 0; box-shadow: none; cursor: pointer;
-  padding: 7px 1px; font-family: var(--font-body); font-size: 13.5px; color: var(--text-secondary);
+  padding: 6px 1px; font-family: var(--font-body); font-size: 13.5px; color: var(--text-secondary);
   transition: color 140ms ease, opacity 120ms ease;
 }
 .chip::after {
@@ -399,13 +407,17 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 /* ---------- Timeline (glass tiles) ---------- */
 .timeline { padding: 14px 0 60px; }
 /* Sticky under the topbar: while you scroll, the current day stays pinned so
-   you always know where you are in the timeline. */
+   you always know where you are in the timeline. Translucent glass rather
+   than a solid strip, so it doesn't read as a box against the page gradient
+   but still masks the cards scrolling beneath it. */
 .day-label {
   position: sticky; top: 68px; z-index: 5;
   display: flex; align-items: center; gap: 12px;
   font-size: 11.5px; text-transform: uppercase; letter-spacing: 1.2px;
   color: var(--text-tertiary); font-weight: 600; margin: 28px 0 12px;
-  padding: 7px 0; background: var(--bg-app);
+  padding: 7px 0; background: var(--bg-app-glass);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 /* Hairline rule after the date structures the timeline into clear day groups. */
 .day-label::after { content: ""; flex: 1; height: 1px; background: var(--border-subtle); }
@@ -456,20 +468,30 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   font-family: var(--font-display); font-weight: 600; font-size: 33px; line-height: 1.12;
   letter-spacing: -1px; margin: 0 0 16px; color: var(--text-primary);
 }
-/* One editorial meta line under the title, middot-separated; the company hub
-   link drops to its own line. */
-.detail-meta { display: flex; flex-wrap: wrap; gap: 4px 0; align-items: baseline; font-size: 13.5px; color: var(--text-secondary); }
-.meta-item { white-space: nowrap; }
-.meta-item + .meta-item::before { content: "\00B7"; margin: 0 10px; color: var(--text-tertiary); }
-.meta-item b { color: var(--text-primary); font-weight: 600; }
-.meta-item.danger, .meta-item.danger b { color: var(--error); }
+/* Notion-style property panel under the title: icon + label column, value
+   column, one quiet row per field. */
+.props { display: flex; flex-direction: column; margin: 2px 0 0; }
+.prop { display: flex; align-items: center; gap: 14px; padding: 6px 0; font-size: 14px; }
+.prop-label {
+  flex: none; width: 148px; display: inline-flex; align-items: center; gap: 9px;
+  color: var(--text-tertiary); font-size: 13px;
+}
+.prop-label svg { width: 15px; height: 15px; flex: none; opacity: 0.75; }
+.prop-value { color: var(--text-primary); min-width: 0; }
+.prop-value b { font-weight: 600; }
+.prop-value .danger { color: var(--error); }
+/* Select-style values render as tinted tags, like Notion's select fields. */
+.prop-tag { display: inline-block; padding: 2.5px 9px; border-radius: var(--r-sm); font-size: 12.5px; font-weight: 500; }
+.prop-tag.danger { background: var(--error-bg); color: var(--error-text); }
+.prop-tag.news { background: var(--chip-indigo-bg); color: var(--chip-indigo-text); }
 .meta-link {
-  flex-basis: 100%; margin-top: 10px; width: fit-content;
-  color: var(--text-primary); font-weight: 500;
+  display: inline-block; margin-top: 14px; width: fit-content;
+  color: var(--text-primary); font-weight: 500; font-size: 13.5px;
   transition: opacity 120ms ease;
 }
 .meta-link:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .meta-link:active { opacity: 0.55; }
+@media (max-width: 560px) { .prop-label { width: 124px; } }
 
 .section-title {
   font-size: 11.5px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-tertiary);

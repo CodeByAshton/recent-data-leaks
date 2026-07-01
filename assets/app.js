@@ -349,23 +349,37 @@ function renderDetail(key) {
 
   const isNews = it.sourceType === "news";
 
-  // Editorial meta line (mirrors render.js detailMain).
-  const meta = el("div", { class: "detail-meta" });
-  meta.appendChild(el("span", { class: "meta-item" }, el("b", { text: it.source })));
-  meta.appendChild(el("span", { class: "meta-item" + (isNews ? "" : " danger"), text: isNews ? "News report" : "Confirmed breach" }));
-  if (it.published) meta.appendChild(el("span", { class: "meta-item" }, "Added ", el("b", { text: fmtDate(it.published) })));
-  if (it.occurred) meta.appendChild(el("span", { class: "meta-item" }, "Occurred ", el("b", { text: fmtDate(it.occurred) })));
-  if (it.affected) meta.appendChild(el("span", { class: "meta-item danger" }, el("b", { text: fmtNum(it.affected) }), " accounts"));
-  if (it.domain) meta.appendChild(el("span", { class: "meta-item" }, el("b", { text: it.domain })));
-  if (!isNews) {
-    const companySlug = String(it.domain ? it.domain.split(".")[0] : it.title).toLowerCase()
-      .replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").replace(/-{2,}/g, "-");
-    meta.appendChild(el("a", { class: "meta-link", href: `/company/${companySlug}` }, `All ${it.title} breaches →`));
-  }
+  // Notion-style property rows (mirrors render.js detailMain + PROP_ICONS).
+  const PROP_ICONS = {
+    source: `<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13.5 13.5 0 0 1 0 18M12 3a13.5 13.5 0 0 0 0 18"/>`,
+    status: `<path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/>`,
+    added: `<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/>`,
+    occurred: `<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>`,
+    accounts: `<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.5-5.5 6-5.5s6 2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.5.3 4 2 4 4.5"/>`,
+    domain: `<path d="M10 14a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 5.93M14 10a5 5 0 0 0-7.07 0L4.8 12.12a5 5 0 0 0 7.07 7.07L13 18.07"/>`,
+  };
+  const prop = (icon, label, valueKids) => {
+    const l = el("span", { class: "prop-label" });
+    l.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PROP_ICONS[icon]}</svg>${label}`;
+    return el("div", { class: "prop" }, l, el("span", { class: "prop-value" }, ...[].concat(valueKids)));
+  };
+  const meta = el("div", { class: "props" });
+  meta.appendChild(prop("source", "Source", el("b", { text: it.source })));
+  meta.appendChild(prop("status", "Status",
+    el("span", { class: "prop-tag " + (isNews ? "news" : "danger"), text: isNews ? "News report" : "Confirmed breach" })));
+  if (it.published) meta.appendChild(prop("added", "Added", fmtDate(it.published)));
+  if (it.occurred) meta.appendChild(prop("occurred", "Occurred", fmtDate(it.occurred)));
+  if (it.affected) meta.appendChild(prop("accounts", "Accounts affected", el("b", { class: "danger", text: fmtNum(it.affected) })));
+  if (it.domain) meta.appendChild(prop("domain", "Domain", it.domain));
 
   // .enter plays the entrance animation — renderDetail only runs on SPA
   // navigation (direct loads keep the SSR page), so this is always user-driven.
   const detail = el("div", { class: "detail enter" }, el("h1", { text: it.title }), meta);
+  if (!isNews) {
+    const companySlug = String(it.domain ? it.domain.split(".")[0] : it.title).toLowerCase()
+      .replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").replace(/-{2,}/g, "-");
+    detail.appendChild(el("a", { class: "meta-link", href: `/company/${companySlug}` }, `All ${it.title} breaches →`));
+  }
 
   if (it.tags && it.tags.length) {
     detail.appendChild(el("div", { class: "section-title", text: "What was exposed" }));
