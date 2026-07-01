@@ -48,12 +48,6 @@
   --error-bg:     #fef2f2;
   --error-border: #fecaca;
 
-  /* ---- Literal brand accent (funnel CTA) ---- */
-  --literal:       #7e14ff;
-  --literal-hover: #6a10d8;
-  --literal-tint:  rgba(126,20,255,0.06);
-  --literal-line:  rgba(126,20,255,0.20);
-
   /* ---- Chip surfaces ---- */
   --chip-terra-bg:   rgba(196, 122, 80, 0.14);
   --chip-terra-text: #b0653c;
@@ -134,11 +128,6 @@
   --error-bg:     #200a0a;
   --error-border: #7f1d1d;
 
-  --literal:       #9a53ff;
-  --literal-hover: #8a3dff;
-  --literal-tint:  rgba(154,83,255,0.12);
-  --literal-line:  rgba(154,83,255,0.28);
-
   --chip-terra-bg:   rgba(196, 122, 80, 0.20);
   --chip-terra-text: #d99a76;
   --chip-indigo-bg:  rgba(91, 127, 212, 0.18);
@@ -210,7 +199,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .topbar .wrap { display: flex; align-items: center; gap: 24px; height: 68px; position: relative; }
 .brandblock { flex: none; display: flex; flex-direction: column; gap: 1px; }
 .brand {
-  font-family: var(--font-display); font-size: 21px; font-weight: 600; letter-spacing: -0.4px;
+  font-family: var(--font-display); font-size: 17px; font-weight: 600; letter-spacing: -0.3px;
   color: var(--text-primary);
 }
 .byline {
@@ -219,7 +208,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 }
 .byline img { display: block; }
 .byline span { font-weight: 600; color: var(--text-secondary); }
-.byline:hover span { color: var(--literal); }
+.byline:hover span { color: var(--text-primary); }
 .topnav { flex: 1; display: flex; justify-content: center; gap: 34px; }
 .topnav a {
   position: relative; font-size: 14px; color: var(--text-secondary); padding: 6px 1px;
@@ -281,7 +270,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .yn-window { display: flex; gap: 8px; overflow: hidden; }
 .yn-window a {
   flex: none; color: var(--text-secondary); font-size: 13px; padding: 5px 10px;
-  border: 1px solid var(--border-subtle); border-radius: var(--r-full); background: var(--bg-card);
+  border: 1px solid var(--border-subtle); border-radius: var(--r-md); background: var(--bg-card);
   box-shadow: var(--shadow-xs); transition: .15s;
 }
 .yn-window a { transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 120ms ease; }
@@ -290,7 +279,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .yn-btn {
   flex: none; width: 28px; height: 28px; padding: 0; line-height: 1; font-size: 15px;
   background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary);
-  border-radius: var(--r-full); cursor: pointer; box-shadow: var(--shadow-xs);
+  border-radius: var(--r-md); cursor: pointer; box-shadow: var(--shadow-xs);
   transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
 }
 .yn-btn:hover:not(:disabled) { border-color: var(--border-standard); background: var(--bg-hover); }
@@ -311,7 +300,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .chip {
   background: var(--bg-card); border: 1px solid var(--border-subtle); cursor: pointer; padding: 6px 13px;
   font-family: var(--font-body); font-size: 13px; color: var(--text-secondary);
-  border-radius: var(--r-full); box-shadow: var(--shadow-xs);
+  border-radius: var(--r-md); box-shadow: var(--shadow-xs);
   transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 120ms ease;
 }
 .chip:hover { color: var(--text-primary); background: var(--bg-hover); }
@@ -339,7 +328,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .badge {
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
   color: var(--chip-terra-text); background: var(--chip-terra-bg);
-  padding: 3px 8px; border-radius: var(--r-full); line-height: 1.4;
+  padding: 3px 8px; border-radius: var(--r-sm); line-height: 1.4;
 }
 .badge.news { color: var(--chip-indigo-text); background: var(--chip-indigo-bg); }
 .src { font-size: 13px; color: var(--text-secondary); }
@@ -375,12 +364,14 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 }
 .detail-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .pill {
-  font-size: 12.5px; padding: 5px 11px; border-radius: var(--r-full);
-  background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border-subtle);
+  font-size: 12.5px; padding: 6px 12px; border-radius: var(--r-md);
+  background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-xs);
 }
 .pill b { color: var(--text-primary); font-weight: 600; }
-.pill.danger { background: var(--accent); color: var(--text-on-accent); border-color: var(--accent); }
-.pill.danger b { color: var(--text-on-accent); }
+/* "Confirmed breach" / account pills read as white cards too, not inverted. */
+.pill.danger { background: var(--bg-card); color: var(--text-secondary); border-color: var(--border-subtle); }
+.pill.danger b { color: var(--text-primary); }
 .pill-link { background: var(--bg-card); box-shadow: var(--shadow-xs); transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 120ms ease; }
 .pill-link:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-standard); }
 .pill-link:active { transform: scale(0.98); }
@@ -445,8 +436,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 /* Exposed-data tags */
 .exposed { display: flex; flex-wrap: wrap; gap: 8px; }
 .exposed .tag {
-  background: var(--accent-soft); color: var(--text-secondary); border: 1px solid var(--border-subtle);
-  padding: 5px 12px; border-radius: var(--r-full); font-size: 13px;
+  background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-subtle);
+  padding: 5px 12px; border-radius: var(--r-md); font-size: 13px; box-shadow: var(--shadow-xs);
 }
 
 /* CTA */
@@ -462,12 +453,12 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 /* ---------- Literal funnel CTA ---------- */
 .protect-cta {
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--literal); color: #fff; font-weight: 600; font-size: 14px;
-  font-family: var(--font-body); padding: 11px 18px; border-radius: var(--r-md);
-  box-shadow: 0 2px 10px -2px rgba(126,20,255,0.45);
+  background: var(--accent); color: var(--text-on-accent); font-weight: 600; font-size: 14px;
+  font-family: var(--font-body); padding: 11px 18px; border: 1px solid var(--accent); border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
   transition: background 140ms ease, transform 120ms ease, box-shadow 140ms ease;
 }
-.protect-cta:hover { background: var(--literal-hover); box-shadow: 0 4px 16px -2px rgba(126,20,255,0.55); }
+.protect-cta:hover { background: var(--accent-hover); box-shadow: var(--shadow-md); }
 .protect-cta:active { transform: scale(0.98); }
 .protect-cta span { transition: transform 140ms ease; }
 .protect-cta:hover span { transform: translateX(3px); }
@@ -477,7 +468,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .protect-block {
   display: flex; align-items: center; justify-content: space-between; gap: 18px;
   margin: 30px 0; padding: 18px 20px; border-radius: var(--r-lg);
-  background: var(--literal-tint); border: 1px solid var(--literal-line);
+  background: var(--accent-soft); border: 1px solid var(--border-subtle);
 }
 .protect-block b { display: block; color: var(--text-primary); font-size: 15px; }
 .protect-block span { display: block; color: var(--text-secondary); font-size: 13.5px; margin-top: 2px; }
@@ -487,32 +478,36 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .loading, .empty { text-align: center; color: var(--text-secondary); padding: 80px 0; font-size: 16px; font-family: var(--font-display); }
 .err { background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-subtle); padding: 14px 18px; border-radius: var(--r-md); margin: 20px 0; font-size: 14px; }
 
-@media (max-width: 640px) {
-  .statgrid { grid-template-columns: repeat(2, 1fr); }
-  .protect-block { flex-direction: column; align-items: flex-start; gap: 14px; }
-  .byline { font-size: 10px; }
-
-  /* Mobile header: brand left, Refresh centered, hamburger right. */
-  .topbar .wrap { gap: 0; justify-content: space-between; }
-  .brand { font-size: 13px; line-height: 1.12; letter-spacing: -0.2px; }
-  .brand span { display: block; }
-  .navtoggle { display: flex; }
-  .yn-label { display: none; }
-  .yearnav { gap: 8px; }
-  .yn-window { gap: 6px; }
-  .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); gap: 8px; }
+/* Collapse the primary nav into the hamburger before the header can overflow.
+   Brand left; theme + refresh + hamburger grouped right, in normal flow. */
+@media (max-width: 820px) {
+  .topbar .wrap { gap: 10px; height: auto; min-height: 64px; padding-top: 10px; padding-bottom: 10px; }
+  .navtoggle { display: flex; flex: none; }
+  .status { margin-left: auto; flex: none; gap: 8px; }
   .status .dot, #updated { display: none; }
 
   .topnav {
     display: none; position: absolute; top: 100%; left: 0; right: 0;
-    flex-direction: column; gap: 0; padding: 4px 22px 14px;
-    background: var(--glass-fill-strong);
-    -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6);
+    flex-direction: column; gap: 0; padding: 6px 22px 14px;
+    background: var(--bg-elevated);          /* opaque so it never shows content through */
     border-bottom: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-lg);
   }
   .topnav.open { display: flex; }
   .topnav a { padding: 14px 0; border-bottom: 1px solid var(--border-hairline); font-size: 15px; color: var(--text-primary); }
+  .topnav a:last-child { border-bottom: 0; }
   .topnav a::after { display: none; }
+}
+
+@media (max-width: 640px) {
+  .statgrid { grid-template-columns: repeat(2, 1fr); }
+  .protect-block { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .byline { font-size: 10px; }
+  .brand { font-size: 10.5px; line-height: 1.12; letter-spacing: -0.2px; }
+  .brand span { display: block; }
+  .yn-label { display: none; }
+  .yearnav { gap: 8px; }
+  .yn-window { gap: 6px; }
 }
 
 @media (max-width: 560px) {

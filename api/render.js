@@ -15,8 +15,7 @@ const LITERAL = "https://literal.so";
 const BRAND = NAME.split(" ").map((w) => `<span>${w}</span>`).join(" ");
 const TAGLINE = "A live timeline of data breaches";
 // "by Literal" lockup, shown under the wordmark; links to the product.
-const LITERAL_MARK = `<img src="/assets/literal-logo.svg" width="14" height="14" alt="" />`;
-const BYLINE = `<a class="byline" href="${LITERAL}" target="_blank" rel="noopener">by ${LITERAL_MARK}<span>Literal</span></a>`;
+const BYLINE = `<a class="byline" href="${LITERAL}" target="_blank" rel="noopener">by <span>Literal</span></a>`;
 // Funnel button: sends worried visitors from a breach to Literal.
 function protectCTA(place) {
   return `<a class="protect-cta${place ? " " + place : ""}" href="${LITERAL}" target="_blank" rel="noopener">Protect your data <span aria-hidden="true">&rarr;</span></a>`;
@@ -271,7 +270,7 @@ function builtMain(feed) {
 }
 
 // ---------- document ----------
-function page({ title, description, canonical, robots, ogType, image, jsonld, main }) {
+function page({ title, description, canonical, robots, ogType, image, jsonld, main, publishedTime, modifiedTime }) {
   const verify = [
     process.env.GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${esc(process.env.GOOGLE_SITE_VERIFICATION)}" />` : "",
     process.env.BING_SITE_VERIFICATION ? `<meta name="msvalidate.01" content="${esc(process.env.BING_SITE_VERIFICATION)}" />` : "",
@@ -291,14 +290,22 @@ function page({ title, description, canonical, robots, ogType, image, jsonld, ma
 ${verify}
 <meta property="og:type" content="${ogType || "website"}" />
 <meta property="og:site_name" content="${NAME}" />
+<meta property="og:locale" content="en_US" />
 <meta property="og:title" content="${esc(title)}" />
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:url" content="${esc(canonical)}" />
 <meta property="og:image" content="${esc(img)}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="${esc(title)}" />
+${ogType === "article" && publishedTime ? `<meta property="article:published_time" content="${esc(publishedTime)}" />` : ""}
+${ogType === "article" && modifiedTime ? `<meta property="article:modified_time" content="${esc(modifiedTime)}" />` : ""}
+${ogType === "article" ? `<meta property="article:publisher" content="${LITERAL}" />` : ""}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="${esc(title)}" />
 <meta name="twitter:description" content="${esc(description)}" />
 <meta name="twitter:image" content="${esc(img)}" />
+<meta name="twitter:image:alt" content="${esc(title)}" />
 <link rel="alternate" type="application/rss+xml" title="${NAME}" href="${SITE}/rss.xml" />
 ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%231A1A1A'/%3E%3Ccircle cx='50' cy='50' r='19' fill='%23EDEEEF'/%3E%3C/svg%3E" />
@@ -355,9 +362,14 @@ module.exports = async function handler(req, res) {
           description: it.summary || DESC,
           datePublished: it.published || undefined,
           dateModified: it.published || undefined,
+          image: `${SITE}/api/og?id=${encodeURIComponent(it.slug || it.id)}`,
           mainEntityOfPage: `${SITE}/breach/${it.slug || it.id}`,
-          author: { "@type": "Organization", name: NAME },
-          publisher: { "@type": "Organization", name: NAME },
+          author: { "@type": "Organization", name: NAME, url: `${SITE}/` },
+          publisher: {
+            "@type": "Organization", name: NAME,
+            logo: { "@type": "ImageObject", url: `${SITE}/assets/icon.svg` },
+          },
+          isPartOf: { "@type": "WebSite", name: NAME, url: `${SITE}/` },
         },
         {
           "@type": "BreadcrumbList",
@@ -385,6 +397,8 @@ module.exports = async function handler(req, res) {
         canonical: `${SITE}/breach/${it.slug || it.id}`,
         ogType: "article",
         image: `${SITE}/api/og?id=${encodeURIComponent(it.slug || it.id)}`,
+        publishedTime: it.published || undefined,
+        modifiedTime: it.published || undefined,
         jsonld: ld,
         main: detailMain(it, feed.items),
       });
@@ -506,7 +520,16 @@ module.exports = async function handler(req, res) {
       "@context": "https://schema.org",
       "@graph": [
         {
+          "@type": "Organization",
+          "@id": `${SITE}/#organization`,
+          name: NAME,
+          url: `${SITE}/`,
+          logo: `${SITE}/assets/icon.svg`,
+          parentOrganization: { "@type": "Organization", name: "Literal", url: LITERAL },
+        },
+        {
           "@type": "WebSite", name: NAME, url: `${SITE}/`, description: DESC,
+          publisher: { "@id": `${SITE}/#organization` },
           potentialAction: {
             "@type": "SearchAction",
             target: { "@type": "EntryPoint", urlTemplate: `${SITE}/?q={search_term_string}` },
