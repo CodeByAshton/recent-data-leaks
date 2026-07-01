@@ -6,7 +6,10 @@
 const app = document.getElementById("app");
 
 let FEED = null;
-let filter = { source: "all", q: "" };
+// Two independent filter dimensions plus search: `type` is a single-select
+// radio (all/breach/news); `sources` is a multi-select toggle set (empty =
+// every source). They combine, so "News from BleepingComputer" works.
+let filter = { type: "all", sources: new Set(), q: "" };
 const LITERAL = "https://literal.so"; // funnel target (keep in sync with render.js)
 // UTM-tagged Literal link, one utm_content per placement (mirrors render.js).
 function literalUrl(content) {
@@ -102,9 +105,8 @@ function fmtDate(iso) {
 function visibleItems() {
   const q = filter.q.trim().toLowerCase();
   return FEED.items.filter((it) => {
-    if (filter.source === "breach" && it.sourceType !== "breach") return false;
-    if (filter.source === "news" && it.sourceType !== "news") return false;
-    if (filter.source !== "all" && filter.source !== "breach" && filter.source !== "news" && it.source !== filter.source) return false;
+    if (filter.type !== "all" && it.sourceType !== filter.type) return false;
+    if (filter.sources.size && !filter.sources.has(it.source)) return false;
     if (q && !(`${it.title} ${it.summary || ""} ${it.source}`.toLowerCase().includes(q))) return false;
     return true;
   });
@@ -181,19 +183,26 @@ function renderList(noAnim) {
   });
   app.appendChild(el("div", { class: "controls" }, search));
 
-  // Two chip rows (mirrors render.js controlsHTML): type filter, then a
-  // quieter labeled row of individual sources. Same single-select semantics.
+  // Two chip rows (mirrors render.js controlsHTML). The type row is a radio;
+  // the source row is a set of independent toggles — both can be active at
+  // once, so "News from BleepingComputer" is one click on each row.
   const labels = { all: "All", breach: "Confirmed breaches", news: "News" };
-  const chipFor = (s) => el("button", {
-    class: "chip" + (filter.source === s ? " active" : ""),
-    text: labels[s] || s,
-    onclick: () => { filter.source = s; render(); },
-  });
   const typeChips = el("div", { class: "chips", role: "group", "aria-label": "Filter by type" });
-  ["all", "breach", "news"].forEach((s) => typeChips.appendChild(chipFor(s)));
+  ["all", "breach", "news"].forEach((s) => typeChips.appendChild(el("button", {
+    class: "chip" + (filter.type === s ? " active" : ""),
+    text: labels[s], type: "button", "aria-pressed": filter.type === s ? "true" : "false",
+    onclick: () => { filter.type = s; render(); },
+  })));
   app.appendChild(typeChips);
   const srcChips = el("div", { class: "chips chips-src", role: "group", "aria-label": "Filter by source" });
-  (FEED.sources || []).forEach((s) => srcChips.appendChild(chipFor(s)));
+  (FEED.sources || []).forEach((s) => srcChips.appendChild(el("button", {
+    class: "chip" + (filter.sources.has(s) ? " active" : ""),
+    text: s, type: "button", "aria-pressed": filter.sources.has(s) ? "true" : "false",
+    onclick: () => {
+      if (filter.sources.has(s)) filter.sources.delete(s); else filter.sources.add(s);
+      render();
+    },
+  })));
   app.appendChild(srcChips);
 
   // Prefer the full year list from the API (matches the server-rendered nav);
@@ -340,13 +349,19 @@ function renderDetail(key) {
 
   const isNews = it.sourceType === "news";
 
+  // Editorial meta line (mirrors render.js detailMain).
   const meta = el("div", { class: "detail-meta" });
-  meta.appendChild(el("span", { class: "pill" }, el("b", { text: it.source })));
-  meta.appendChild(el("span", { class: "pill" + (isNews ? "" : " danger"), text: isNews ? "News report" : "Confirmed breach" }));
-  if (it.published) meta.appendChild(el("span", { class: "pill" }, "Added ", el("b", { text: fmtDate(it.published) })));
-  if (it.occurred) meta.appendChild(el("span", { class: "pill" }, "Occurred ", el("b", { text: fmtDate(it.occurred) })));
-  if (it.affected) meta.appendChild(el("span", { class: "pill danger" }, el("b", { text: fmtNum(it.affected) }), " accounts"));
-  if (it.domain) meta.appendChild(el("span", { class: "pill" }, el("b", { text: it.domain })));
+  meta.appendChild(el("span", { class: "meta-item" }, el("b", { text: it.source })));
+  meta.appendChild(el("span", { class: "meta-item" + (isNews ? "" : " danger"), text: isNews ? "News report" : "Confirmed breach" }));
+  if (it.published) meta.appendChild(el("span", { class: "meta-item" }, "Added ", el("b", { text: fmtDate(it.published) })));
+  if (it.occurred) meta.appendChild(el("span", { class: "meta-item" }, "Occurred ", el("b", { text: fmtDate(it.occurred) })));
+  if (it.affected) meta.appendChild(el("span", { class: "meta-item danger" }, el("b", { text: fmtNum(it.affected) }), " accounts"));
+  if (it.domain) meta.appendChild(el("span", { class: "meta-item" }, el("b", { text: it.domain })));
+  if (!isNews) {
+    const companySlug = String(it.domain ? it.domain.split(".")[0] : it.title).toLowerCase()
+      .replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").replace(/-{2,}/g, "-");
+    meta.appendChild(el("a", { class: "meta-link", href: `/company/${companySlug}` }, `All ${it.title} breaches →`));
+  }
 
   // .enter plays the entrance animation — renderDetail only runs on SPA
   // navigation (direct loads keep the SSR page), so this is always user-driven.

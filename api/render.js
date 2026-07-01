@@ -255,13 +255,15 @@ function relatedHTML(it, items) {
 
 function detailMain(it, items) {
   const isNews = it.sourceType === "news";
-  const pills = [`<span class="pill"><b>${esc(it.source)}</b></span>`,
-    `<span class="pill${isNews ? "" : " danger"}">${isNews ? "News report" : "Confirmed breach"}</span>`];
-  if (it.published) pills.push(`<span class="pill">Added <b>${esc(fmtDate(it.published))}</b></span>`);
-  if (it.occurred) pills.push(`<span class="pill">Occurred <b>${esc(fmtDate(it.occurred))}</b></span>`);
-  if (it.affected) pills.push(`<span class="pill danger"><b>${esc(fmtNum(it.affected))}</b> accounts</span>`);
-  if (it.domain) pills.push(`<span class="pill"><b>${esc(it.domain)}</b></span>`);
-  if (!isNews) pills.push(`<a class="pill pill-link" href="/company/${esc(companySlug(it))}">All ${esc(it.title)} breaches &rarr;</a>`);
+  // One editorial meta line (middot-separated) instead of a row of pills;
+  // the company hub link sits on its own line below it.
+  const pills = [`<span class="meta-item"><b>${esc(it.source)}</b></span>`,
+    `<span class="meta-item${isNews ? "" : " danger"}">${isNews ? "News report" : "Confirmed breach"}</span>`];
+  if (it.published) pills.push(`<span class="meta-item">Added <b>${esc(fmtDate(it.published))}</b></span>`);
+  if (it.occurred) pills.push(`<span class="meta-item">Occurred <b>${esc(fmtDate(it.occurred))}</b></span>`);
+  if (it.affected) pills.push(`<span class="meta-item danger"><b>${esc(fmtNum(it.affected))}</b> accounts</span>`);
+  if (it.domain) pills.push(`<span class="meta-item"><b>${esc(it.domain)}</b></span>`);
+  if (!isNews) pills.push(`<a class="meta-link" href="/company/${esc(companySlug(it))}">All ${esc(it.title)} breaches &rarr;</a>`);
 
   const exposed = (it.tags && it.tags.length)
     ? `<div class="section-title">What was exposed</div><div class="exposed">${it.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>`
