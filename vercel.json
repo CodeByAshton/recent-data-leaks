@@ -9,6 +9,16 @@
   "crons": [
     { "path": "/api/feed", "schedule": "0 0 * * *" }
   ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "DENY" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/api/render" },
     { "source": "/breach/:id", "destination": "/api/render?id=:id" },
@@ -17,6 +27,7 @@
     { "source": "/about", "destination": "/api/render?view=about" },
     { "source": "/methodology", "destination": "/api/render?view=methodology" },
     { "source": "/how-its-built", "destination": "/api/render?view=built" },
+    { "source": "/privacy", "destination": "/api/render?view=privacy" },
     { "source": "/biggest-data-breaches", "destination": "/api/render?view=biggest" },
     { "source": "/company/:slug", "destination": "/api/render?company=:slug" },
     { "source": "/glossary", "destination": "/api/render?view=glossary" },

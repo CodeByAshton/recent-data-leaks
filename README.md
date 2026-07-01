@@ -76,7 +76,8 @@ api/
   render.js      SSR for all HTML pages (home, breach, year, stats, company,
                  glossary, about, methodology, how-its-built). Wired via rewrites.
   feed.js        GET /api/feed — live aggregated JSON (recent 100, no `details`,
-                 plus full `years` list). Falls back to data/feed.json.
+                 plus full `years` list and a slim full-catalog `index` for
+                 client-side search). Falls back to data/feed.json.
   og.js          GET /api/og[?id=slug] — EDGE function, returns a PNG OG image
                  (SVG fallback on error). Fetches data from /api/feed.
   sitemap.js     GET /sitemap.xml — home + breaches + years + companies + pages.
@@ -91,7 +92,6 @@ assets/
   app.js         Client hydration: routing, timeline, detail, year pager, search,
                  hamburger nav. Vanilla, no framework.
   styles.css     Liquid-glass theme (Literal design tokens), light default + dark toggle, mobile rules.
-  og.svg         Static fallback OG image (referenced by /api/og on error).
 data/
   feed.json      Fallback snapshot (regenerate with `npm run seed`). Details
                  stripped to keep it small.
@@ -113,6 +113,7 @@ vercel.json      Function config, cron, and all route rewrites.
 | `/glossary`, `/glossary/:slug` | render | Glossary index + term pages |
 | `/stats` | render | Live statistics |
 | `/about`, `/methodology`, `/how-its-built` | render | Trust + engineering pages |
+| `/privacy` | render | Privacy policy (analytics, local storage) |
 | `/api/feed` | feed | Light JSON feed |
 | `/api/og`, `/api/og?id=:slug` | og (edge) | PNG share image |
 | `/sitemap.xml` | sitemap | Dynamic |
@@ -135,7 +136,11 @@ To add a source, add it to `NEWS_SOURCES`. To tune relevance, edit `BREACH_KEYWO
 ## SEO
 
 - Server-rendered pages, each with title, meta description, Open Graph, JSON-LD.
-- Full catalog (~1,000 incidents) = ~1,000 indexable pages.
+- The **full HIBP catalog is kept uncapped** (every breach is a permanent
+  indexable page); only news items are capped (`NEWS_CAP` in `_aggregate.js`)
+  because they are ephemeral. The sitemap lists breach pages only — news pages
+  stay reachable on-site but are not submitted, since they 404 once they fall
+  out of the source RSS windows.
 - Keyword-friendly slugs (`/breach/company-year`); old hash URLs 301 to the slug.
 - Per-breach FAQ with FAQPage schema; company hubs with FAQPage; glossary DefinedTerm.
 - Original "what to do if affected" guidance (anti-thin-content).
@@ -193,14 +198,20 @@ The script tag is already injected by `render.js`; no package needed.
 ## Known caveats
 
 - **OG images:** PNG via `@vercel/og` (edge). The Inter font is fetched at runtime
-  from a pinned jsDelivr URL; if that fails, the endpoint returns an SVG fallback.
+  from a pinned jsDelivr URL; if that fails, the endpoint returns an inline SVG
+  fallback (generated in `og.js` itself).
 - **News clustering** is a heuristic (shared distinctive token within 10 days).
   It can occasionally over- or under-merge; low impact since the catalog is
   ~99% confirmed HIBP breaches.
+- **News pages are ephemeral** by design: once an item leaves the source RSS
+  windows it drops from the feed and its page 404s. That's why the sitemap only
+  lists confirmed breaches.
 - **Fallback snapshot** can go stale; it only serves if live aggregation fails.
 - **Company pages** for single-incident companies overlap the breach page; framed
   as a distinct question ("Has X had a data breach?"). Revisit with `noindex` if
   Search Console flags duplication.
+- **Source fetches time out after 8s** (`FETCH_TIMEOUT_MS`) so one hanging feed
+  degrades to an `errors` entry instead of stalling page renders.
 
 ---
 
@@ -214,7 +225,12 @@ The script tag is already injected by `render.js`; no package needed.
 **Product:**
 - Email alerts / subscribe (returning audience) — needs an email provider + store.
 - "Check if you were affected" lookup — likely needs a paid HIBP key + privacy handling.
-- Privacy policy + terms (needed once analytics/email are live).
+- Terms of use (privacy policy is live at `/privacy`).
+
+**Attribution:** every link to Literal carries UTM parameters with a distinct
+`utm_content` per placement (`byline`, `hero-cta`, `breach-cta`), so conversions
+can be traced to the CTA that drove them. See `literalUrl()` in `render.js`
+and `app.js` (keep the two in sync).
 
 ---
 

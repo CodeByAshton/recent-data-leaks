@@ -4,7 +4,7 @@
   "private": true,
   "description": "A live, server-rendered timeline of public data breaches.",
   "scripts": {
-    "seed": "node -e \"const {aggregate}=require('./api/_aggregate'); aggregate().then(f=>{f.items=f.items.map(({details,...r})=>r); require('fs').writeFileSync('data/feed.json', JSON.stringify(f)); console.log('seeded fallback snapshot:', f.items.length, 'items');})\"",
+    "seed": "node -e \"const {aggregate}=require('./api/_aggregate'); aggregate().then(f=>{if(!f.items.length){console.error('refusing to overwrite snapshot with an empty feed; errors:',f.errors);process.exit(1);} f.items=f.items.map(({details,...r})=>r); require('fs').writeFileSync('data/feed.json', JSON.stringify(f)); console.log('seeded fallback snapshot:', f.items.length, 'items');})\"",
     "test": "node --test",
     "dev": "vercel dev"
   },

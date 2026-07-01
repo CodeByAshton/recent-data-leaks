@@ -21,9 +21,13 @@ module.exports = async function handler(req, res) {
     `  <url><loc>${SITE}/about</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
     `  <url><loc>${SITE}/methodology</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
     `  <url><loc>${SITE}/how-its-built</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
+    `  <url><loc>${SITE}/privacy</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>`,
     ...years.map((y) => `  <url><loc>${SITE}/year/${y}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>`),
     ...companies.map((c) => `  <url><loc>${SITE}/company/${c}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`),
-    ...feed.items.map((it) => {
+    // Only confirmed breaches: their pages are permanent. News items fall out
+    // of the feed as source RSS windows move on, so sitemapping them would
+    // submit URLs that soon 404 (they stay reachable on-site, just unlisted).
+    ...feed.items.filter((it) => it.sourceType === "breach").map((it) => {
       let lastmod = "";
       if (it.published) {
         const d = new Date(it.published);

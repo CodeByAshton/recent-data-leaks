@@ -8,6 +8,10 @@ const app = document.getElementById("app");
 let FEED = null;
 let filter = { source: "all", q: "" };
 const LITERAL = "https://literal.so"; // funnel target (keep in sync with render.js)
+// UTM-tagged Literal link, one utm_content per placement (mirrors render.js).
+function literalUrl(content) {
+  return `${LITERAL}/?utm_source=recentdataleaks&utm_medium=referral&utm_campaign=breach-timeline&utm_content=${content}`;
+}
 // True once the user has navigated inside the SPA. On a direct load/reload the
 // server-rendered detail page is complete (full details, works for the whole
 // catalog), so we leave it untouched and only take over after in-app navigation.
@@ -22,6 +26,18 @@ async function loadFeed() {
       if (!res.ok) continue;
       const data = await res.json();
       if (data && Array.isArray(data.items)) {
+        // The API sends the recent window with full card data plus a slim
+        // `index` of the rest of the catalog, so search/filters cover every
+        // breach. Index entries are flagged: their cards become plain links
+        // (full navigation, SSR resolves them) instead of SPA navigation.
+        if (Array.isArray(data.index) && data.index.length) {
+          const have = new Set(data.items.map((x) => x.slug || x.id));
+          data.items = data.items.concat(
+            data.index
+              .filter((x) => x.slug && !have.has(x.slug))
+              .map((x) => ({ ...x, _indexOnly: true }))
+          );
+        }
         FEED = data;
         FEED._live = url.includes("/api/");
         return FEED;
@@ -51,8 +67,8 @@ function el(tag, attrs = {}, ...kids) {
 }
 
 // Literal funnel button (mirrors render.js protectCTA so it survives hydration).
-function protectEl(place) {
-  return el("a", { class: "protect-cta" + (place ? " " + place : ""), href: LITERAL, target: "_blank", rel: "noopener" },
+function protectEl(place, content) {
+  return el("a", { class: "protect-cta" + (place ? " " + place : ""), href: literalUrl(content || "hero-cta"), target: "_blank", rel: "noopener" },
     "Protect your data ", el("span", { "aria-hidden": "true" }, "→"));
 }
 
@@ -89,7 +105,7 @@ function visibleItems() {
     if (filter.source === "breach" && it.sourceType !== "breach") return false;
     if (filter.source === "news" && it.sourceType !== "news") return false;
     if (filter.source !== "all" && filter.source !== "breach" && filter.source !== "news" && it.source !== filter.source) return false;
-    if (q && !(`${it.title} ${it.summary} ${it.source}`.toLowerCase().includes(q))) return false;
+    if (q && !(`${it.title} ${it.summary || ""} ${it.source}`.toLowerCase().includes(q))) return false;
     return true;
   });
 }
@@ -217,9 +233,12 @@ function drawTimeline(container) {
     container.appendChild(el("div", { class: "empty", text: "No incidents match your filters." }));
     return;
   }
-  // Cap the home view; show everything once the user filters or searches.
+  // Cap the home view; show matches once the user filters or searches — but
+  // still bounded, since filters now run over the full catalog and rendering
+  // 1,000+ cards at once would jank.
+  const FILTER_LIMIT = 200;
   const hasFilter = filter.q.trim() || filter.source !== "all";
-  const items = hasFilter ? all : all.slice(0, HOME_LIMIT);
+  const items = hasFilter ? all.slice(0, FILTER_LIMIT) : all.slice(0, HOME_LIMIT);
 
   const tl = el("div", { class: "timeline" });
   let currentDay = null;
@@ -241,6 +260,9 @@ function drawTimeline(container) {
       `Showing the ${HOME_LIMIT} most recent of ${FEED.count} tracked incidents. `,
       el("a", { href: "/stats" }, "See statistics"),
       " or browse by year above."));
+  } else if (hasFilter && all.length > FILTER_LIMIT) {
+    container.appendChild(el("p", { class: "more-note" },
+      `Showing the first ${FILTER_LIMIT} of ${all.length} matches. Refine your search to narrow them down.`));
   }
 }
 
@@ -261,11 +283,11 @@ function cardFor(it) {
   if (meta.childNodes.length) body.appendChild(meta);
 
   const key = it.slug || it.id;
-  return el("a", {
-    class: "card" + (isNews ? " news" : ""),
-    href: `/breach/${encodeURIComponent(key)}`,
-    onclick: (e) => { e.preventDefault(); go(key); },
-  }, body);
+  // Index-only items (outside the loaded window) navigate normally so the
+  // server renders their full page; loaded items use SPA navigation.
+  const attrs = { class: "card" + (isNews ? " news" : ""), href: `/breach/${encodeURIComponent(key)}` };
+  if (!it._indexOnly) attrs.onclick = (e) => { e.preventDefault(); go(key); };
+  return el("a", attrs, body);
 }
 
 function renderDetail(key) {
@@ -309,7 +331,7 @@ function renderDetail(key) {
     el("div", {},
       el("b", { text: "Worried your data is exposed?" }),
       el("span", { text: "Take back control of your personal data with Literal." })),
-    protectEl("on-block")));
+    protectEl("on-block", "breach-cta")));
 
   detail.appendChild(el("div", { class: "section-title", text: "Details" }));
   detail.appendChild(el("div", { class: "detail-desc", text: it.details || it.summary || "No description available." }));
@@ -327,12 +349,24 @@ function renderDetail(key) {
     class: "cta" + (isNews ? " news" : ""), href: it.url, target: "_blank", rel: "noopener noreferrer",
   }, isNews ? "Read full report ↗" : "View on source ↗"));
 
-  // Related breaches: same source first, then same year. Plain links (full
-  // navigation) so breaches outside the loaded recent window still resolve via SSR.
-  let pool = FEED.items.filter((x) => x.id !== it.id && x.source === it.source).slice(0, 4);
-  if (pool.length < 3) {
-    const yr = String(it.published || "").slice(0, 4);
-    const more = FEED.items.filter((x) => x.id !== it.id && String(x.published || "").slice(0, 4) === yr && !pool.includes(x)).slice(0, 4 - pool.length);
+  // Related breaches by shared exposed-data tags, then same year (mirrors
+  // render.js relatedHTML). Plain links (full navigation) so breaches outside
+  // the loaded recent window still resolve via SSR.
+  const myTags = new Set(it.tags || []);
+  const yr = String(it.occurred || it.published || "").slice(0, 4);
+  const scored = [];
+  for (const x of FEED.items) {
+    if (x.id === it.id || (x.slug && x.slug === it.slug)) continue;
+    let shared = 0;
+    if (myTags.size && x.tags) for (const t of x.tags) if (myTags.has(t)) shared++;
+    let score = Math.min(shared, 10);
+    if (yr && String(x.occurred || x.published || "").slice(0, 4) === yr) score += 2;
+    if (score > 0) scored.push([score, x]);
+  }
+  scored.sort((a, b) => b[0] - a[0]);
+  let pool = scored.slice(0, 4).map((s) => s[1]);
+  if (pool.length < 4) {
+    const more = FEED.items.filter((x) => x.id !== it.id && !pool.includes(x)).slice(0, 4 - pool.length);
     pool = pool.concat(more);
   }
   if (pool.length) {
