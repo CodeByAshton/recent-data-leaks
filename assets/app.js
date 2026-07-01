@@ -9,6 +9,11 @@ const liveDot = document.getElementById("liveDot");
 
 let FEED = null;
 let filter = { source: "all", q: "" };
+const LITERAL = "https://literal.so"; // funnel target (keep in sync with render.js)
+// True once the user has navigated inside the SPA. On a direct load/reload the
+// server-rendered detail page is complete (full details, works for the whole
+// catalog), so we leave it untouched and only take over after in-app navigation.
+let navigated = false;
 
 // ---------- Data ----------
 async function loadFeed() {
@@ -45,6 +50,12 @@ function el(tag, attrs = {}, ...kids) {
     n.appendChild(typeof kid === "string" ? document.createTextNode(kid) : kid);
   }
   return n;
+}
+
+// Literal funnel button (mirrors render.js protectCTA so it survives hydration).
+function protectEl(place) {
+  return el("a", { class: "protect-cta" + (place ? " " + place : ""), href: LITERAL, target: "_blank", rel: "noopener" },
+    "Protect your data ", el("span", { "aria-hidden": "true" }, "→"));
 }
 
 function relTime(iso) {
@@ -97,19 +108,31 @@ function isManagedRoute() {
 }
 function go(key) {
   const url = key ? `/breach/${encodeURIComponent(key)}` : "/";
+  navigated = true;
   history.pushState({ key: key || null }, "", url);
   render();
 }
-window.addEventListener("popstate", render);
+window.addEventListener("popstate", () => { navigated = true; render(); });
 
 // ---------- Views ----------
 function render() {
   if (!FEED) return;
   if (!isManagedRoute()) return; // leave server-rendered archive pages alone
   const id = routeId();
-  app.innerHTML = "";
-  if (id) renderDetail(id);
-  else renderList();
+  if (id) {
+    // The light feed carries only the recent window and no `details` body, so a
+    // client re-render of a breach page is strictly worse than the server one
+    // (and empty for anything outside that window). On first paint leave the SSR
+    // content in place; only re-render once the user navigates within the SPA and
+    // we actually have the item loaded.
+    const it = FEED.items.find((x) => x.slug === id || x.id === id);
+    if (!navigated || !it) return;
+    app.innerHTML = "";
+    renderDetail(id);
+  } else {
+    app.innerHTML = "";
+    renderList();
+  }
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
 }
 
@@ -120,6 +143,7 @@ function renderList() {
       el("span", { class: "count", text: String(FEED.count) }),
       " tracked incidents · newest first")
   );
+  hero.appendChild(el("div", { class: "hero-cta" }, protectEl()));
   // Prefer the full year list from the API (matches the server-rendered nav);
   // fall back to deriving from loaded items.
   const years = (FEED.years && FEED.years.length)
@@ -135,7 +159,7 @@ function renderList() {
   });
   app.appendChild(el("div", { class: "controls" }, search));
 
-  const sources = ["all", "breach", "news", ...FEED.sources];
+  const sources = ["all", "breach", "news", ...(FEED.sources || [])];
   const labels = { all: "All", breach: "Confirmed breaches", news: "News" };
   const chips = el("div", { class: "chips" });
   sources.forEach((s) => {
@@ -230,16 +254,12 @@ function cardFor(it) {
   if (it.occurred) meta.appendChild(el("span", {}, "Occurred ", el("b", { text: new Date(it.occurred).getFullYear() })));
   if (meta.childNodes.length) body.appendChild(meta);
 
-  const kids = [];
-  if (it.logo) kids.push(el("img", { class: "logo", src: it.logo, alt: "", loading: "lazy", onerror: function () { this.remove(); } }));
-  kids.push(body);
-
   const key = it.slug || it.id;
   return el("a", {
     class: "card" + (isNews ? " news" : ""),
     href: `/breach/${encodeURIComponent(key)}`,
     onclick: (e) => { e.preventDefault(); go(key); },
-  }, ...kids);
+  }, body);
 }
 
 function renderDetail(key) {
@@ -254,8 +274,6 @@ function renderDetail(key) {
   }
 
   const isNews = it.sourceType === "news";
-  const head = el("div", { class: "detail-head" });
-  if (it.logo) head.appendChild(el("img", { class: "logo", src: it.logo, alt: "", onerror: function () { this.remove(); } }));
 
   const meta = el("div", { class: "detail-meta" });
   meta.appendChild(el("span", { class: "pill" }, el("b", { text: it.source })));
@@ -265,9 +283,7 @@ function renderDetail(key) {
   if (it.affected) meta.appendChild(el("span", { class: "pill danger" }, el("b", { text: fmtNum(it.affected) }), " accounts"));
   if (it.domain) meta.appendChild(el("span", { class: "pill" }, el("b", { text: it.domain })));
 
-  head.appendChild(el("div", {}, el("h1", { text: it.title }), meta));
-
-  const detail = el("div", { class: "detail" }, head);
+  const detail = el("div", { class: "detail" }, el("h1", { text: it.title }), meta);
 
   if (it.tags && it.tags.length) {
     detail.appendChild(el("div", { class: "section-title", text: "What was exposed" }));
@@ -282,6 +298,12 @@ function renderDetail(key) {
     it.advice.forEach((a) => ul.appendChild(el("li", { text: a })));
     detail.appendChild(ul);
   }
+
+  detail.appendChild(el("div", { class: "protect-block" },
+    el("div", {},
+      el("b", { text: "Worried your data is exposed?" }),
+      el("span", { text: "Take back control of your personal data with Literal." })),
+    protectEl("on-block")));
 
   detail.appendChild(el("div", { class: "section-title", text: "Details" }));
   detail.appendChild(el("div", { class: "detail-desc", text: it.details || it.summary || "No description available." }));
@@ -349,6 +371,25 @@ document.getElementById("refresh").addEventListener("click", async () => {
   updatedEl.textContent = "Refreshing…";
   try { await loadFeed(); setUpdated(); render(); } catch (_) { updatedEl.textContent = "Offline"; }
 });
+
+// Theme toggle: light <-> dark by toggling the `dark` class on <html>, persisted
+// to localStorage. The no-flash setup in the document <head> applies the saved
+// choice before first paint; this just handles clicks and keeps theme-color in sync.
+const themeToggle = document.getElementById("themeToggle");
+if (themeToggle) {
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const applyTheme = (dark) => {
+    document.documentElement.classList.toggle("dark", dark);
+    themeToggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    if (themeMeta) themeMeta.setAttribute("content", dark ? "#111111" : "#EDEEEF");
+  };
+  applyTheme(document.documentElement.classList.contains("dark"));
+  themeToggle.addEventListener("click", () => {
+    const dark = !document.documentElement.classList.contains("dark");
+    try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (_) {}
+    applyTheme(dark);
+  });
+}
 
 // Mobile hamburger: toggle the nav dropdown. Wired independently of the feed so
 // it works on every page, even server-rendered ones the client doesn't manage.

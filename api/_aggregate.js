@@ -3,6 +3,7 @@
 // seed script. Dependency-free: Node 18+ global fetch + hand-rolled RSS parsing.
 
 const { createHash } = require("node:crypto");
+const { slugify } = require("./_content");
 
 const UA = "breach-feed (personal-project)";
 
@@ -64,14 +65,9 @@ function truncate(s, n = 260) {
   return s.slice(0, n).replace(/\s+\S*$/, "") + "...";
 }
 
-function slugify(s) {
-  return String(s || "")
-    .toLowerCase()
-    .replace(/['’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-}
+// slugify lives in _content.js (shared with render/sitemap) so the breach slugs
+// here and the company slugs there can never drift apart. Re-exported below for
+// the unit tests.
 
 // Original, page-specific guidance based on what data was exposed. This unique
 // content is what separates a breach page from a copied news snippet.

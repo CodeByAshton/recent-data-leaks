@@ -38,7 +38,7 @@ full architecture, file map, and route table. This file is the quick operating g
 - Sources / RSS parsing / breach filter / clustering / slug+advice+FAQ: `api/_aggregate.js`.
 - Page markup + JSON-LD + handler routing: `api/render.js`.
 - Glossary + company-slug logic: `api/_content.js`.
-- Styles (dark monochrome, 6px radii, mobile rules): `assets/styles.css`.
+- Styles (Literal liquid-glass design tokens; light default + `.dark` toggle, mobile rules): `assets/styles.css`.
 
 ## Current focus
 On-site work is largely done. The remaining bottleneck is off-site: enable Vercel

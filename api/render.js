@@ -9,9 +9,17 @@ const { companySlug, GLOSSARY } = require("./_content");
 
 const SITE = "https://recentdataleaks.com";
 const NAME = "Recent Data Leaks";
+// Recent Data Leaks is a Literal property; this is the funnel target.
+const LITERAL = "https://literal.so";
 // Each word in its own span so the brand can stack one-per-line on mobile.
 const BRAND = NAME.split(" ").map((w) => `<span>${w}</span>`).join(" ");
 const TAGLINE = "A live timeline of data breaches";
+// "by Literal" lockup, shown under the wordmark; links to the product.
+const BYLINE = `<a class="byline" href="${LITERAL}" target="_blank" rel="noopener">by <span>Literal</span></a>`;
+// Funnel button: sends worried visitors from a breach to Literal.
+function protectCTA(place) {
+  return `<a class="protect-cta${place ? " " + place : ""}" href="${LITERAL}" target="_blank" rel="noopener">Protect your data <span aria-hidden="true">&rarr;</span></a>`;
+}
 const DESC =
   "Recent Data Leaks is a live, continuously updated timeline of public data breaches: who was breached, when it happened, how many accounts were affected, and what data was exposed. Aggregated from Have I Been Pwned and leading security news sources.";
 
@@ -49,12 +57,11 @@ const yearOf = (it) => String(it.occurred || it.published || "").slice(0, 4);
 // ---------- markup ----------
 function cardHTML(it) {
   const isNews = it.sourceType === "news";
-  const logo = it.logo ? `<img class="logo" src="${esc(it.logo)}" alt="" loading="lazy" />` : "";
   const bits = [];
   if (it.affected) bits.push(`<span><b>${esc(fmtNum(it.affected))}</b> accounts affected</span>`);
   if (it.occurred) bits.push(`<span>Occurred <b>${new Date(it.occurred).getFullYear()}</b></span>`);
   const meta = bits.length ? `<div class="meta">${bits.join("")}</div>` : "";
-  return `<a class="card${isNews ? " news" : ""}" href="/breach/${esc(it.slug || it.id)}">${logo}<div class="card-body"><div class="card-top"><span class="badge${isNews ? " news" : ""}">${isNews ? "News" : "Breach"}</span><span class="src">${esc(it.source)}</span><span class="time">${esc(relTime(it.published))}</span></div><h3>${esc(it.title)}</h3><p>${esc(it.summary || "")}</p>${meta}</div></a>`;
+  return `<a class="card${isNews ? " news" : ""}" href="/breach/${esc(it.slug || it.id)}"><div class="card-body"><div class="card-top"><span class="badge${isNews ? " news" : ""}">${isNews ? "News" : "Breach"}</span><span class="src">${esc(it.source)}</span><span class="time">${esc(relTime(it.published))}</span></div><h3>${esc(it.title)}</h3><p>${esc(it.summary || "")}</p>${meta}</div></a>`;
 }
 
 function listHTML(items) {
@@ -83,13 +90,24 @@ function yearNavHTML(items) {
   return `<nav class="yearnav" aria-label="Browse by year"><span class="yn-label">Browse by year:</span><button class="yn-btn" type="button" aria-label="Previous years" disabled>&lsaquo;</button><span class="yn-window">${win}</span><button class="yn-btn" type="button" aria-label="Next years"${nextDisabled}>&rsaquo;</button></nav>`;
 }
 
+// Labels for the source filter chips; mirrors app.js so the server-rendered
+// controls match the hydrated ones and the layout doesn't shift on load.
+const SOURCE_LABELS = { all: "All", breach: "Confirmed breaches", news: "News" };
+function controlsHTML(feed) {
+  const sources = ["all", "breach", "news", ...(feed.sources || [])];
+  const chips = sources
+    .map((s) => `<button class="chip${s === "all" ? " active" : ""}" type="button">${esc(SOURCE_LABELS[s] || s)}</button>`)
+    .join("");
+  return `<div class="controls"><input class="search" type="search" placeholder="Search breaches, companies, sources&hellip;" aria-label="Search breaches" value="" /></div><div class="chips">${chips}</div>`;
+}
+
 const HOME_LIMIT = 80;
 function homeMain(feed) {
   const recent = feed.items.slice(0, HOME_LIMIT);
   const more = feed.count > HOME_LIMIT
     ? `<p class="more-note">Showing the ${HOME_LIMIT} most recent of ${feed.count} tracked incidents. <a href="/stats">See statistics</a> or browse by year above.</p>`
     : "";
-  return `<section class="hero"><h1>${esc(TAGLINE)}</h1><p><span class="count">${feed.count}</span> tracked incidents &middot; newest first</p>${yearNavHTML(feed.items)}</section>${listHTML(recent)}${more}`;
+  return `<section class="hero"><h1>${esc(TAGLINE)}</h1><p><span class="count">${feed.count}</span> tracked incidents &middot; newest first</p><div class="hero-cta">${protectCTA()}</div>${yearNavHTML(feed.items)}</section>${controlsHTML(feed)}${listHTML(recent)}${more}`;
 }
 
 function statsMain(feed) {
@@ -167,7 +185,6 @@ function relatedHTML(it, items) {
 
 function detailMain(it, items) {
   const isNews = it.sourceType === "news";
-  const logo = it.logo ? `<img class="logo" src="${esc(it.logo)}" alt="" />` : "";
   const pills = [`<span class="pill"><b>${esc(it.source)}</b></span>`,
     `<span class="pill${isNews ? "" : " danger"}">${isNews ? "News report" : "Confirmed breach"}</span>`];
   if (it.published) pills.push(`<span class="pill">Added <b>${esc(fmtDate(it.published))}</b></span>`);
@@ -182,11 +199,12 @@ function detailMain(it, items) {
   const advice = (it.advice && it.advice.length)
     ? `<div class="section-title">What to do if you were affected</div><ul class="advice">${it.advice.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>`
     : "";
+  const protect = `<div class="protect-block"><div><b>Worried your data is exposed?</b><span>Take back control of your personal data with Literal.</span></div>${protectCTA("on-block")}</div>`;
   const faq = (it.faq && it.faq.length)
     ? `<div class="section-title">Frequently asked questions</div><div class="faq">${it.faq.map((f) => `<div class="faq-item"><h3 class="faq-q">${esc(f.q)}</h3><p class="faq-a">${esc(f.a)}</p></div>`).join("")}</div>`
     : "";
 
-  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><div class="detail-head">${logo}<div><h1>${esc(it.title)}</h1><div class="detail-meta">${pills.join("")}</div></div></div>${exposed}${advice}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
+  return `<a class="back" href="/">&larr; Back to timeline</a><div class="detail"><h1>${esc(it.title)}</h1><div class="detail-meta">${pills.join("")}</div>${exposed}${advice}${protect}<div class="section-title">Details</div><div class="detail-desc">${esc(it.details || it.summary || "No description available.")}</div>${faq}<a class="cta" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${isNews ? "Read full report &#8599;" : "View on source &#8599;"}</a>${relatedHTML(it, items)}</div>`;
 }
 
 // ---------- SEO surface pages ----------
@@ -250,7 +268,7 @@ function builtMain(feed) {
 }
 
 // ---------- document ----------
-function page({ title, description, canonical, robots, ogType, image, jsonld, main }) {
+function page({ title, description, canonical, robots, ogType, image, jsonld, main, publishedTime, modifiedTime }) {
   const verify = [
     process.env.GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${esc(process.env.GOOGLE_SITE_VERIFICATION)}" />` : "",
     process.env.BING_SITE_VERIFICATION ? `<meta name="msvalidate.01" content="${esc(process.env.BING_SITE_VERIFICATION)}" />` : "",
@@ -260,34 +278,43 @@ function page({ title, description, canonical, robots, ogType, image, jsonld, ma
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}" />
 <meta name="robots" content="${robots || "index, follow, max-image-preview:large, max-snippet:-1"}" />
-<meta name="theme-color" content="#0a0a0a" />
+<meta name="theme-color" content="#EDEEEF" />
 <link rel="canonical" href="${esc(canonical)}" />
 ${verify}
 <meta property="og:type" content="${ogType || "website"}" />
 <meta property="og:site_name" content="${NAME}" />
+<meta property="og:locale" content="en_US" />
 <meta property="og:title" content="${esc(title)}" />
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:url" content="${esc(canonical)}" />
 <meta property="og:image" content="${esc(img)}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="${esc(title)}" />
+${ogType === "article" && publishedTime ? `<meta property="article:published_time" content="${esc(publishedTime)}" />` : ""}
+${ogType === "article" && modifiedTime ? `<meta property="article:modified_time" content="${esc(modifiedTime)}" />` : ""}
+${ogType === "article" ? `<meta property="article:publisher" content="${LITERAL}" />` : ""}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="${esc(title)}" />
 <meta name="twitter:description" content="${esc(description)}" />
 <meta name="twitter:image" content="${esc(img)}" />
+<meta name="twitter:image:alt" content="${esc(title)}" />
 <link rel="alternate" type="application/rss+xml" title="${NAME}" href="${SITE}/rss.xml" />
 ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='42' fill='%23f5f5f5'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%231A1A1A'/%3E%3Ccircle cx='50' cy='50' r='19' fill='%23EDEEEF'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/assets/styles.css" />
 </head>
 <body>
 <a class="skip" href="#app">Skip to content</a>
-<header class="topbar"><div class="wrap"><a class="brand" href="/">${BRAND}</a><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
+<header class="topbar"><div class="wrap"><div class="brandblock"><a class="brand" href="/">${BRAND}</a>${BYLINE}</div><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="themeToggle" class="ghost-btn icon-btn" type="button" aria-label="Toggle dark mode"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
 <main class="wrap" id="app">${main}</main>
 <footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/how-its-built">How it&#39;s built</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -333,9 +360,14 @@ module.exports = async function handler(req, res) {
           description: it.summary || DESC,
           datePublished: it.published || undefined,
           dateModified: it.published || undefined,
+          image: `${SITE}/api/og?id=${encodeURIComponent(it.slug || it.id)}`,
           mainEntityOfPage: `${SITE}/breach/${it.slug || it.id}`,
-          author: { "@type": "Organization", name: NAME },
-          publisher: { "@type": "Organization", name: NAME },
+          author: { "@type": "Organization", name: NAME, url: `${SITE}/` },
+          publisher: {
+            "@type": "Organization", name: NAME,
+            logo: { "@type": "ImageObject", url: `${SITE}/assets/icon.svg` },
+          },
+          isPartOf: { "@type": "WebSite", name: NAME, url: `${SITE}/` },
         },
         {
           "@type": "BreadcrumbList",
@@ -363,6 +395,8 @@ module.exports = async function handler(req, res) {
         canonical: `${SITE}/breach/${it.slug || it.id}`,
         ogType: "article",
         image: `${SITE}/api/og?id=${encodeURIComponent(it.slug || it.id)}`,
+        publishedTime: it.published || undefined,
+        modifiedTime: it.published || undefined,
         jsonld: ld,
         main: detailMain(it, feed.items),
       });
@@ -484,7 +518,16 @@ module.exports = async function handler(req, res) {
       "@context": "https://schema.org",
       "@graph": [
         {
+          "@type": "Organization",
+          "@id": `${SITE}/#organization`,
+          name: NAME,
+          url: `${SITE}/`,
+          logo: `${SITE}/assets/icon.svg`,
+          parentOrganization: { "@type": "Organization", name: "Literal", url: LITERAL },
+        },
+        {
           "@type": "WebSite", name: NAME, url: `${SITE}/`, description: DESC,
+          publisher: { "@id": `${SITE}/#organization` },
           potentialAction: {
             "@type": "SearchAction",
             target: { "@type": "EntryPoint", urlTemplate: `${SITE}/?q={search_term_string}` },
