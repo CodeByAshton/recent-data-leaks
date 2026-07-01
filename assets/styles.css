@@ -509,8 +509,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   .statgrid { grid-template-columns: repeat(2, 1fr); }
   .protect-block { flex-direction: column; align-items: flex-start; gap: 14px; }
   .byline { font-size: 10px; }
-  .brand { font-size: 10.5px; line-height: 1.12; letter-spacing: -0.2px; }
-  .brand span { display: block; }
+  /* Header has room now (Refresh moved to the hero) — keep the brand on one line. */
+  .brand { font-size: 15px; letter-spacing: -0.3px; }
   .yn-label { display: none; }
   .yearnav { gap: 8px; }
   .yn-window { gap: 6px; }
