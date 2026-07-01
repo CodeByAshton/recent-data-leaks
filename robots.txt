@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
+# The raw function URLs duplicate the rewritten pages (/api/render?view=stats
+# vs /stats); keep crawlers on the canonical paths. /api/og stays crawlable —
+# it serves the og:image previews.
+Disallow: /api/render
+Disallow: /api/feed
 
 Sitemap: https://recentdataleaks.com/sitemap.xml

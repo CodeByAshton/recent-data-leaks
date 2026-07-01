@@ -11,6 +11,12 @@ const SITE = "https://recentdataleaks.com";
 const NAME = "Recent Data Leaks";
 // Recent Data Leaks is a Literal property; this is the funnel target.
 const LITERAL = "https://literal.so";
+// Every anchor to Literal carries UTM parameters with a distinct utm_content
+// per placement, so signups can be attributed to the site AND to the specific
+// CTA that drove them (keep in sync with literalUrl in assets/app.js).
+function literalUrl(content) {
+  return `${LITERAL}/?utm_source=recentdataleaks&utm_medium=referral&utm_campaign=breach-timeline&utm_content=${content}`;
+}
 // Cache-busting token for static assets: changes every deploy (Vercel sets the
 // commit SHA), so an updated styles.css/app.js is never served stale from cache.
 const ASSET_VER = (process.env.VERCEL_GIT_COMMIT_SHA || "dev").slice(0, 8);
@@ -18,10 +24,10 @@ const ASSET_VER = (process.env.VERCEL_GIT_COMMIT_SHA || "dev").slice(0, 8);
 const BRAND = NAME.split(" ").map((w) => `<span>${w}</span>`).join(" ");
 const TAGLINE = "A live timeline of data breaches";
 // "by Literal" lockup, shown under the wordmark; links to the product.
-const BYLINE = `<a class="byline" href="${LITERAL}" target="_blank" rel="noopener">by <span>Literal</span></a>`;
+const BYLINE = `<a class="byline" href="${literalUrl("byline")}" target="_blank" rel="noopener">by <span>Literal</span></a>`;
 // Funnel button: sends worried visitors from a breach to Literal.
-function protectCTA(place) {
-  return `<a class="protect-cta${place ? " " + place : ""}" href="${LITERAL}" target="_blank" rel="noopener">Protect your data <span aria-hidden="true">&rarr;</span></a>`;
+function protectCTA(place, content) {
+  return `<a class="protect-cta${place ? " " + place : ""}" href="${literalUrl(content || "hero-cta")}" target="_blank" rel="noopener">Protect your data <span aria-hidden="true">&rarr;</span></a>`;
 }
 const DESC =
   "Recent Data Leaks is a live, continuously updated timeline of public data breaches: who was breached, when it happened, how many accounts were affected, and what data was exposed. Aggregated from Have I Been Pwned and leading security news sources.";
@@ -55,13 +61,12 @@ function relTime(iso) {
   if (diff < 86400 * 30) return `${Math.floor(diff / 86400)}d ago`;
   return fmtDate(iso);
 }
+// Always a full date server-side: this HTML is rendered in UTC and CDN-cached
+// for up to ~2h, so "Today"/"Yesterday" would go stale (and be wrong across
+// timezones). The client re-renders with relative labels once hydrated.
 function dayKey(iso) {
   if (!iso) return "Undated";
-  const d = new Date(iso), today = new Date(), y = new Date();
-  y.setDate(today.getDate() - 1);
-  if (d.toDateString() === today.toDateString()) return "Today";
-  if (d.toDateString() === y.toDateString()) return "Yesterday";
-  return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 }
 const yearOf = (it) => String(it.occurred || it.published || "").slice(0, 4);
 
@@ -183,15 +188,50 @@ function methodologyMain(feed) {
 </div>`;
 }
 
+function privacyMain() {
+  return `<a class="back" href="/">&larr; Back to timeline</a>
+<section class="hero"><h1>Privacy policy</h1></section>
+<div class="prose">
+<p>Recent Data Leaks is an informational site. It has no accounts, no sign-ups, and it does not ask for or store any personal information about you.</p>
+<h2>Analytics</h2>
+<p>The site uses Vercel Web Analytics to count page views. It is aggregate and anonymized: it does not use cookies and does not track you across sites. It records the page visited, the country of the request, and coarse device information (such as browser and operating system).</p>
+<h2>Stored on your device</h2>
+<p>Your light/dark theme choice is saved in your browser's local storage so it persists between visits. Nothing else is stored, and it never leaves your device.</p>
+<h2>External links</h2>
+<p>Breach entries link to their original sources, and the site links to <a href="${literalUrl("privacy-page")}" target="_blank" rel="noopener">Literal</a>, the product it belongs to. Those sites have their own privacy policies.</p>
+<h2>Contact</h2>
+<p>Questions or concerns? Open an issue on <a href="https://github.com/CodeByAshton/recent-data-leaks" target="_blank" rel="noopener">GitHub</a>.</p>
+</div>`;
+}
+
 function yearMain(items, year) {
   return `<a class="back" href="/">&larr; Back to timeline</a><section class="hero"><h1>Data breaches in ${esc(year)}</h1><p><span class="count">${items.length}</span> tracked incident${items.length === 1 ? "" : "s"} from ${esc(year)}</p></section>${listHTML(items)}`;
 }
 
+// Genuinely related items, not "newest from the same source" (which put the
+// identical 4 links on every HIBP page). Score: same company >> shared exposed-
+// data tags > same year; ties resolve to the most recent (items arrive sorted).
 function relatedHTML(it, items) {
-  let pool = items.filter((x) => x.id !== it.id && x.source === it.source).slice(0, 4);
-  if (pool.length < 3) {
-    const yr = yearOf(it);
-    const more = items.filter((x) => x.id !== it.id && yearOf(x) === yr && !pool.includes(x)).slice(0, 4 - pool.length);
+  const myCompany = it.sourceType === "breach" ? companySlug(it) : null;
+  const myTags = new Set(it.tags || []);
+  const yr = yearOf(it);
+  const scored = [];
+  for (const x of items) {
+    if (x.id === it.id) continue;
+    let score = 0;
+    if (myCompany && x.sourceType === "breach" && companySlug(x) === myCompany) score += 100;
+    if (myTags.size && x.tags) {
+      let shared = 0;
+      for (const t of x.tags) if (myTags.has(t)) shared++;
+      score += Math.min(shared, 10);
+    }
+    if (yr && yearOf(x) === yr) score += 2;
+    if (score > 0) scored.push([score, x]);
+  }
+  scored.sort((a, b) => b[0] - a[0]);
+  let pool = scored.slice(0, 4).map((s) => s[1]);
+  if (pool.length < 4) {
+    const more = items.filter((x) => x.id !== it.id && !pool.includes(x)).slice(0, 4 - pool.length);
     pool = pool.concat(more);
   }
   if (!pool.length) return "";
@@ -214,7 +254,7 @@ function detailMain(it, items) {
   const advice = (it.advice && it.advice.length)
     ? `<div class="section-title">What to do if you were affected</div><ul class="advice">${it.advice.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>`
     : "";
-  const protect = `<div class="protect-block"><div><b>Worried your data is exposed?</b><span>Take back control of your personal data with Literal.</span></div>${protectCTA("on-block")}</div>`;
+  const protect = `<div class="protect-block"><div><b>Worried your data is exposed?</b><span>Take back control of your personal data with Literal.</span></div>${protectCTA("on-block", "breach-cta")}</div>`;
   const faq = (it.faq && it.faq.length)
     ? `<div class="section-title">Frequently asked questions</div><div class="faq">${it.faq.map((f) => `<div class="faq-item"><h3 class="faq-q">${esc(f.q)}</h3><p class="faq-a">${esc(f.a)}</p></div>`).join("")}</div>`
     : "";
@@ -293,12 +333,12 @@ function page({ title, description, canonical, robots, ogType, image, jsonld, ma
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}" />
 <meta name="robots" content="${robots || "index, follow, max-image-preview:large, max-snippet:-1"}" />
 <meta name="theme-color" content="#EDEEEF" />
+<script>try{if(localStorage.getItem("theme")==="dark"){document.documentElement.classList.add("dark");var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content","#111111")}}catch(e){}</script>
 <link rel="canonical" href="${esc(canonical)}" />
 ${verify}
 <meta property="og:type" content="${ogType || "website"}" />
@@ -331,7 +371,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <a class="skip" href="#app">Skip to content</a>
 <header class="topbar"><div class="wrap"><div class="brandblock"><a class="brand" href="/">${BRAND}</a>${BYLINE}</div><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><button id="themeToggle" class="ghost-btn icon-btn" type="button" aria-label="Toggle dark mode"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
 <main class="wrap${narrow ? " read" : ""}" id="app">${main}</main>
-<footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/how-its-built">How it&#39;s built</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
+<footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/how-its-built">How it&#39;s built</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/assets/app.js?v=${ASSET_VER}"></script>
 </body>
@@ -353,9 +393,11 @@ module.exports = async function handler(req, res) {
   if (id) {
     const it = feed.items.find((x) => x.slug === id || x.id === id);
     // Consolidate old hash-id links onto the canonical slug URL with a 301.
+    // Slugs are deterministic, so the redirect is stable — let the CDN keep it.
     if (it && id === it.id && it.slug && id !== it.slug) {
       res.statusCode = 301;
       res.setHeader("Location", `/breach/${it.slug}`);
+      res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
       return res.end();
     }
     if (!it) {
@@ -408,6 +450,10 @@ module.exports = async function handler(req, res) {
         title: `${it.title} — ${NAME}`,
         description: (it.summary || `${it.title}.${affected}`).slice(0, 300),
         canonical: `${SITE}/breach/${it.slug || it.id}`,
+        // News pages are ephemeral (they 404 once the story leaves the source
+        // RSS windows), so don't let search engines index soon-to-die URLs;
+        // confirmed breach pages are permanent and stay indexable.
+        robots: it.sourceType === "news" ? "noindex, follow" : undefined,
         ogType: "article",
         image: `${SITE}/api/og?id=${encodeURIComponent(it.slug || it.id)}`,
         publishedTime: it.published || undefined,
@@ -538,6 +584,14 @@ module.exports = async function handler(req, res) {
       canonical: `${SITE}/methodology`,
       narrow: true,
       main: methodologyMain(feed),
+    });
+  } else if (view === "privacy") {
+    html = page({
+      title: `Privacy policy — ${NAME}`,
+      description: "How Recent Data Leaks handles data: anonymous aggregate analytics, no accounts, no cookies, and a theme preference stored only in your browser.",
+      canonical: `${SITE}/privacy`,
+      narrow: true,
+      main: privacyMain(),
     });
   } else if (view === "built") {
     html = page({

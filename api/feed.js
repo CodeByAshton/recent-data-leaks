@@ -46,10 +46,18 @@ module.exports = async function handler(req, res) {
       const years = [...new Set(
         feed.items.map((x) => String(x.occurred || x.published || "").slice(0, 4)).filter(Boolean)
       )].sort().reverse();
+      // Slim index of the FULL catalog (title/slug/meta only) so client-side
+      // search can find any breach, not just the 100-item recent window; the
+      // client renders index-only matches as plain links that resolve via SSR.
+      const index = feed.items.slice(100).map((x) => ({
+        slug: x.slug, title: x.title, source: x.source, sourceType: x.sourceType,
+        published: x.published, occurred: x.occurred, affected: x.affected,
+      }));
       const light = {
         ...feed,
         years,
         items: feed.items.slice(0, 100).map(strip),
+        index,
       };
       return res.end(JSON.stringify(light));
     }

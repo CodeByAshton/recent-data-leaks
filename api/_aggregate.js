@@ -3,6 +3,8 @@
 // seed script. Dependency-free: Node 18+ global fetch + hand-rolled RSS parsing.
 
 const { createHash } = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
 const { slugify } = require("./_content");
 
 const UA = "breach-feed (personal-project)";
@@ -20,6 +22,10 @@ const BREACH_KEYWORDS = [
   "leak site", "suffered a breach", "disclosed a breach", "info stealer",
 ];
 
+// News items are ephemeral (they drop off the source RSS windows), so only a
+// recent window of them is kept; confirmed breaches are never capped.
+const NEWS_CAP = 200;
+
 const NEWS_SOURCES = [
   { name: "BleepingComputer", url: "https://www.bleepingcomputer.com/feed/" },
   { name: "The Hacker News", url: "https://feeds.feedburner.com/TheHackersNews" },
@@ -30,11 +36,18 @@ const NEWS_SOURCES = [
 
 const sha = (s) => createHash("sha1").update(s).digest("hex").slice(0, 16);
 
+// fromCodePoint throws on invalid references (e.g. lone surrogates like
+// &#55296;), which would abort the whole feed parse; drop those instead.
+function codePoint(n) {
+  try { return String.fromCodePoint(n); } catch (_) { return ""; }
+}
+
 function decodeEntities(s = "") {
+  // &amp; is decoded LAST so double-encoded input ("&amp;lt;") decodes exactly
+  // one level ("&lt;") instead of collapsing all the way to "<".
   return s
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
     .replace(/<[^>]+>/g, " ")
-    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
@@ -44,8 +57,9 @@ function decodeEntities(s = "") {
     .replace(/&#8220;|&#8221;|&#x201c;|&#x201d;/gi, '"')
     .replace(/&#8211;|&#8212;|&#x2013;|&#x2014;/gi, "-")
     .replace(/&#8230;|&#x2026;/gi, "...")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(+n))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&#(\d+);/g, (_, n) => codePoint(+n))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => codePoint(parseInt(n, 16)))
+    .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -129,7 +143,7 @@ function computeFaq(it) {
 }
 
 // Collapse near-duplicate news that covers the same incident. Heuristic: two
-// news items that share a distinctive (non-topic) word and fall within 21 days
+// news items that share a distinctive (non-topic) word and fall within 10 days
 // are treated as the same story; the newest is kept.
 const TOPIC_STOP = new Set(
   ("the a an and or of to in on for with after says said new newly data breach breaches breached " +
@@ -192,10 +206,16 @@ function looksLikeBreach(text) {
   return BREACH_KEYWORDS.some((k) => t.includes(k));
 }
 
+// One slow source must not stall aggregation until the function's own timeout —
+// aggregate() runs inside page renders, so a hanging fetch would take down HTML
+// rendering site-wide. Abort each source after 8s and let it land in `errors`.
+const FETCH_TIMEOUT_MS = 8000;
+
 async function fetchText(url) {
   const res = await fetch(url, {
     headers: { "User-Agent": UA, Accept: "*/*" },
     redirect: "follow",
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
@@ -204,6 +224,7 @@ async function fetchText(url) {
 async function fetchHIBP() {
   const res = await fetch("https://haveibeenpwned.com/api/v3/breaches", {
     headers: { "User-Agent": UA },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`HIBP HTTP ${res.status}`);
   const breaches = await res.json();
@@ -255,6 +276,9 @@ function parseFeed(xml, sourceName) {
     const published = dateStr ? new Date(decodeEntities(dateStr)).toISOString() : null;
 
     if (!title || !link) continue;
+    // Links are rendered into href attributes; only accept web URLs so a
+    // compromised feed can't inject a javascript: or data: scheme.
+    if (!/^https?:\/\//i.test(link.trim())) continue;
     if (!looksLikeBreach(`${title} ${full}`)) continue;
 
     items.push({
@@ -295,6 +319,23 @@ async function aggregate() {
   ];
   await Promise.all(jobs);
 
+  // The breach catalog is the site's backbone: if HIBP failed (or timed out)
+  // but a news source succeeded, the feed would otherwise look "successful"
+  // while ~1,000 breach pages and most of the sitemap silently 404 for the
+  // whole cache window. Backfill breaches from the bundled snapshot instead.
+  if (!collected.some((it) => it.sourceType === "breach")) {
+    try {
+      const snap = JSON.parse(
+        fs.readFileSync(path.join(process.cwd(), "data", "feed.json"), "utf8")
+      );
+      const breaches = (snap.items || []).filter((x) => x.sourceType === "breach");
+      if (breaches.length) {
+        collected.push(...breaches);
+        errors.push("HIBP: breach catalog served from bundled snapshot");
+      }
+    } catch (_) { /* no snapshot available; carry on with what we have */ }
+  }
+
   // Dedupe by id and by normalized url.
   const seen = new Set();
   const items = [];
@@ -306,15 +347,23 @@ async function aggregate() {
     items.push(it);
   }
 
-  // Newest first; undated sink to the bottom.
+  // Newest first; undated sink to the bottom. Ties break on id so the order —
+  // and therefore which colliding item wins the bare slug in assignDerived —
+  // is deterministic across runs (source-fetch completion order is not).
   items.sort((a, b) => {
     const da = a.published ? Date.parse(a.published) : 0;
     const db = b.published ? Date.parse(b.published) : 0;
-    return db - da;
+    return db - da || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
   });
 
   const clustered = clusterNews(items);
-  const finalItems = clustered.slice(0, 1000);
+  // Keep the FULL breach catalog: every breach is a permanent indexable page,
+  // and a cap would silently 404 the oldest ones as new breaches arrive. Only
+  // news is capped — it is ephemeral by nature (RSS windows move on).
+  let newsKept = 0;
+  const finalItems = clustered.filter(
+    (it) => it.sourceType !== "news" || newsKept++ < NEWS_CAP
+  );
   assignDerived(finalItems);
 
   return {

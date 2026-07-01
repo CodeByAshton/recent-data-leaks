@@ -15,6 +15,17 @@ test("decodeEntities strips tags and decodes entities", () => {
   assert.equal(A.decodeEntities("<![CDATA[hello]]>"), "hello");
 });
 
+test("decodeEntities decodes double-encoded input one level only", () => {
+  // "&amp;lt;" is the TEXT "&lt;", not a "<" — decoding must not collapse twice.
+  assert.equal(A.decodeEntities("Tom &amp;amp; Jerry"), "Tom &amp; Jerry");
+  assert.equal(A.decodeEntities("a &amp;lt; b"), "a &lt; b");
+});
+
+test("decodeEntities survives invalid numeric references", () => {
+  // An out-of-range code point makes String.fromCodePoint throw; it must not abort the parse.
+  assert.equal(A.decodeEntities("bad &#1114112; ref"), "bad ref");
+});
+
 test("truncate respects length and adds ellipsis", () => {
   assert.equal(A.truncate("short", 100), "short");
   assert.ok(A.truncate("a ".repeat(200), 50).endsWith("..."));
@@ -36,6 +47,16 @@ test("parseFeed extracts breach items and filters the rest", () => {
   assert.equal(items[0].source, "TestSource");
   assert.equal(items[0].sourceType, "news");
   assert.match(items[0].title, /data breach/);
+});
+
+test("parseFeed rejects non-web link schemes", () => {
+  const xml = `<rss><channel>
+    <item><title>Evil data breach</title><link>javascript:alert(1)</link><description>A data breach.</description></item>
+    <item><title>Real data breach</title><link>https://x.test/ok</link><description>A data breach.</description></item>
+  </channel></rss>`;
+  const items = A.parseFeed(xml, "TestSource");
+  assert.equal(items.length, 1);
+  assert.equal(items[0].url, "https://x.test/ok");
 });
 
 test("computeAdvice tailors guidance to exposed data", () => {
