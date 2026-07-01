@@ -164,15 +164,10 @@ function renderList() {
     el("span", { id: "updated", text: "Live" }),
     el("button", { id: "refresh", class: "ghost-btn", type: "button", "aria-label": "Refresh the feed" }, "Refresh"));
   hero.appendChild(el("div", { class: "hero-actions" }, protectEl(), status));
-  // Prefer the full year list from the API (matches the server-rendered nav);
-  // fall back to deriving from loaded items.
-  const years = (FEED.years && FEED.years.length)
-    ? FEED.years
-    : [...new Set(FEED.items.map((i) => String(i.occurred || i.published || "").slice(0, 4)).filter(Boolean))].sort().reverse();
-  if (years.length) hero.appendChild(buildYearNav(years));
   app.appendChild(hero);
 
-  // Search + filters
+  // Browse controls cluster below the hero: search, filter chips, year nav
+  // (mirrors the server-rendered order in render.js homeMain).
   const search = el("input", {
     class: "search", type: "search", placeholder: "Search breaches, companies, sources…",
     value: filter.q, oninput: (e) => { filter.q = e.target.value; refreshList(); },
@@ -190,6 +185,13 @@ function renderList() {
     }));
   });
   app.appendChild(chips);
+
+  // Prefer the full year list from the API (matches the server-rendered nav);
+  // fall back to deriving from loaded items.
+  const years = (FEED.years && FEED.years.length)
+    ? FEED.years
+    : [...new Set(FEED.items.map((i) => String(i.occurred || i.published || "").slice(0, 4)).filter(Boolean))].sort().reverse();
+  if (years.length) app.appendChild(buildYearNav(years));
 
   const listWrap = el("div", { id: "list" });
   app.appendChild(listWrap);

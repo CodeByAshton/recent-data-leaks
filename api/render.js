@@ -29,6 +29,12 @@ const BYLINE = `<a class="byline" href="${literalUrl("byline")}" target="_blank"
 function protectCTA(place, content) {
   return `<a class="protect-cta${place ? " " + place : ""}" href="${literalUrl(content || "hero-cta")}" target="_blank" rel="noopener">Protect your data <span aria-hidden="true">&rarr;</span></a>`;
 }
+// Contextual funnel block: heading + one-liner + CTA. Used mid-page on breach
+// and company pages, and (with .pre-foot) as the sitewide band above the footer
+// so every SEO landing page has a conversion path, each with its own utm_content.
+function protectBlock(content, heading, sub, extraClass) {
+  return `<div class="protect-block${extraClass ? " " + extraClass : ""}"><div><b>${heading}</b><span>${sub}</span></div>${protectCTA("on-block", content)}</div>`;
+}
 const DESC =
   "Recent Data Leaks is a live, continuously updated timeline of public data breaches: who was breached, when it happened, how many accounts were affected, and what data was exposed. Aggregated from Have I Been Pwned and leading security news sources.";
 
@@ -123,7 +129,9 @@ function homeMain(feed) {
   const more = feed.count > HOME_LIMIT
     ? `<p class="more-note">Showing the ${HOME_LIMIT} most recent of ${feed.count} tracked incidents. <a href="/stats">See statistics</a> or browse by year above.</p>`
     : "";
-  return `<section class="hero"><h1>${esc(TAGLINE)}</h1><p><span class="count">${feed.count}</span> tracked incidents &middot; newest first</p><div class="hero-actions">${protectCTA()}<div class="feed-status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div></div>${yearNavHTML(feed.items)}</section>${controlsHTML(feed)}${listHTML(recent)}${more}`;
+  // The hero carries the message + CTA + live status; all the browse controls
+  // (search, filter chips, year nav) cluster together below it.
+  return `<section class="hero"><h1>${esc(TAGLINE)}</h1><p><span class="count">${feed.count}</span> tracked incidents &middot; newest first</p><div class="hero-actions">${protectCTA()}<div class="feed-status"><span class="dot live" id="liveDot" aria-hidden="true"></span><span id="updated">Live</span><button id="refresh" class="ghost-btn" type="button" aria-label="Refresh the feed">Refresh</button></div></div></section>${controlsHTML(feed)}${yearNavHTML(feed.items)}${listHTML(recent)}${more}`;
 }
 
 function statsMain(feed) {
@@ -254,7 +262,7 @@ function detailMain(it, items) {
   const advice = (it.advice && it.advice.length)
     ? `<div class="section-title">What to do if you were affected</div><ul class="advice">${it.advice.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>`
     : "";
-  const protect = `<div class="protect-block"><div><b>Worried your data is exposed?</b><span>Take back control of your personal data with Literal.</span></div>${protectCTA("on-block", "breach-cta")}</div>`;
+  const protect = protectBlock("breach-cta", "Worried your data is exposed?", "Take back control of your personal data with Literal.");
   const faq = (it.faq && it.faq.length)
     ? `<div class="section-title">Frequently asked questions</div><div class="faq">${it.faq.map((f) => `<div class="faq-item"><h3 class="faq-q">${esc(f.q)}</h3><p class="faq-a">${esc(f.a)}</p></div>`).join("")}</div>`
     : "";
@@ -285,7 +293,7 @@ function companyMain(feed, slug) {
     ? `<div class="section-title">Data exposed across these incidents</div><div class="exposed">${tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>`
     : "";
   const intro = `${esc(name)} appears in ${items.length} tracked breach${items.length > 1 ? "es" : ""}${total ? `, affecting around ${fmtNum(total)} accounts in total` : ""}.`;
-  return `<a class="back" href="/">&larr; Back to timeline</a><section class="hero"><h1>Has ${esc(name)} had a data breach?</h1><p>${intro}</p></section><div class="section-title">Known incidents</div><ul class="ranklist plain">${incidents}</ul>${exposed}<div class="prose" style="margin-top:24px"><p>If you have an account with ${esc(name)}, change your password and turn on two-factor authentication, and treat messages that reference the company with caution. Open any incident above for what was exposed and what to do.</p></div>`;
+  return `<a class="back" href="/">&larr; Back to timeline</a><section class="hero"><h1>Has ${esc(name)} had a data breach?</h1><p>${intro}</p></section><div class="section-title">Known incidents</div><ul class="ranklist plain">${incidents}</ul>${exposed}${protectBlock("company-cta", `Have an account with ${esc(name)}?`, "Take back control of your personal data with Literal.")}<div class="prose push"><p>If you have an account with ${esc(name)}, change your password and turn on two-factor authentication, and treat messages that reference the company with caution. Open any incident above for what was exposed and what to do.</p></div>`;
 }
 
 function glossaryIndexMain() {
@@ -323,7 +331,7 @@ function builtMain(feed) {
 }
 
 // ---------- document ----------
-function page({ title, description, canonical, robots, ogType, image, jsonld, main, publishedTime, modifiedTime, narrow }) {
+function page({ title, description, canonical, robots, ogType, image, jsonld, main, publishedTime, modifiedTime, narrow, funnel = true }) {
   const verify = [
     process.env.GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${esc(process.env.GOOGLE_SITE_VERIFICATION)}" />` : "",
     process.env.BING_SITE_VERIFICATION ? `<meta name="msvalidate.01" content="${esc(process.env.BING_SITE_VERIFICATION)}" />` : "",
@@ -371,6 +379,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ""}
 <a class="skip" href="#app">Skip to content</a>
 <header class="topbar"><div class="wrap"><div class="brandblock"><a class="brand" href="/">${BRAND}</a>${BYLINE}</div><nav class="topnav" id="topnav" aria-label="Primary"><a href="/stats">Statistics</a><a href="/about">About</a><a href="/methodology">Methodology</a></nav><div class="status"><button id="themeToggle" class="ghost-btn icon-btn" type="button" aria-label="Toggle dark mode"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div><button class="navtoggle" id="navtoggle" type="button" aria-label="Menu" aria-controls="topnav" aria-expanded="false"><span></span><span></span><span></span></button></div></header>
 <main class="wrap${narrow ? " read" : ""}" id="app">${main}</main>
+${funnel ? `<div class="wrap">${protectBlock("footer-cta", "Don&#39;t wait for the next breach", "Take back control of your personal data with Literal.", "pre-foot")}</div>` : ""}
 <footer class="wrap foot"><nav class="footnav" aria-label="Footer"><a href="/stats">Statistics</a> &middot; <a href="/biggest-data-breaches">Biggest breaches</a> &middot; <a href="/glossary">Glossary</a> &middot; <a href="/about">About</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="/how-its-built">How it&#39;s built</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/rss.xml">RSS</a> &middot; <a href="/sitemap.xml">Sitemap</a></nav><p>Aggregated from Have I Been Pwned, BleepingComputer, The Hacker News, Krebs on Security, The Record &amp; SecurityWeek. Not affiliated with any source. For awareness only.</p></footer>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/assets/app.js?v=${ASSET_VER}"></script>
@@ -460,6 +469,7 @@ module.exports = async function handler(req, res) {
         modifiedTime: it.published || undefined,
         jsonld: ld,
         narrow: true,
+        funnel: false, // breach pages carry their own contextual protect block
         main: detailMain(it, feed.items),
       });
     }
@@ -513,6 +523,7 @@ module.exports = async function handler(req, res) {
         description: `Known data breaches involving ${name}: dates, accounts affected, and what data was exposed.`,
         canonical: `${SITE}/company/${company}`,
         jsonld: ld,
+        funnel: false, // company pages carry their own contextual protect block
         main,
       });
     }
