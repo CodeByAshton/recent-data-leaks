@@ -123,7 +123,11 @@ function statsMain(feed) {
   const largest = [...breaches].filter((x) => x.affected).sort((a, b) => b.affected - a.affected).slice(0, 8);
 
   const stat = (n, l) => `<div class="stat"><div class="stat-n">${esc(n)}</div><div class="stat-l">${esc(l)}</div></div>`;
-  const yearRows = years.map((y) => `<li><a href="/year/${y}">${y}</a><span class="bar" style="--w:${Math.round((byYear[y] / Math.max(...Object.values(byYear))) * 100)}%"></span><b>${byYear[y]}</b></li>`).join("");
+  const maxY = Math.max(1, ...Object.values(byYear));
+  // --w is the count as a fraction of the busiest year (0-100, unitless); the
+  // CSS maps that onto the bar track so bars stay proportional instead of all
+  // pinning to the same capped width.
+  const yearRows = years.map((y) => `<li><a href="/year/${y}">${y}</a><span class="bar" style="--w:${(byYear[y] / maxY * 100).toFixed(1)}"></span><b>${byYear[y]}</b></li>`).join("");
   const tagRows = topTags.map(([t, c]) => `<li><span>${esc(t)}</span><b>${c}</b></li>`).join("");
   const bigRows = largest.map((b) => `<li><a href="/breach/${esc(b.slug)}">${esc(b.title)}</a><b>${esc(fmtNum(b.affected))}</b></li>`).join("");
 

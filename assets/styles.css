@@ -412,7 +412,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .ranklist li a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ranklist li b { margin-left: auto; color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .ranklist li .rank { color: var(--text-tertiary); font-variant-numeric: tabular-nums; min-width: 26px; flex: none; }
-.ranklist li .bar { height: 6px; border-radius: var(--r-full); background: var(--accent); width: var(--w); max-width: 45%; opacity: .28; }
+/* Bar length is proportional to the year's share of the busiest year: --w is
+   0-100, and the busiest year fills 42% of the row. */
+.ranklist li .bar { height: 6px; border-radius: var(--r-full); background: var(--accent); width: calc(var(--w, 0) * 0.42%); min-width: 2px; opacity: .3; }
 .ranklist.plain li .bar { display: none; }
 
 /* Prose pages (About, Methodology) */
