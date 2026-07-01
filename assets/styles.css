@@ -5,6 +5,9 @@
    ============================================================ */
 
 :root {
+  /* Native UI (form controls, scrollbars) follows the active theme. */
+  color-scheme: light;
+
   /* ---- Brand accent (neutral black) ---- */
   --accent:             #000000;
   --accent-hover:       #1A1A1A;
@@ -94,6 +97,8 @@
    DARK THEME — .dark on <html>
    ============================================================ */
 .dark {
+  color-scheme: dark;
+
   --accent:         #FFFFFF;
   --accent-hover:   #FFFFFF;
   --accent-light:   rgba(255,255,255,0.18);
@@ -143,6 +148,16 @@
 }
 
 * { box-sizing: border-box; }
+
+/* The Literal interaction spec animates transforms and shadows throughout;
+   honor users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
 
 html { background: var(--bg-app); }
 html, body {

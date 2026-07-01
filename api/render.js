@@ -333,12 +333,12 @@ function page({ title, description, canonical, robots, ogType, image, jsonld, ma
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}" />
 <meta name="robots" content="${robots || "index, follow, max-image-preview:large, max-snippet:-1"}" />
 <meta name="theme-color" content="#EDEEEF" />
+<script>try{if(localStorage.getItem("theme")==="dark"){document.documentElement.classList.add("dark");var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content","#111111")}}catch(e){}</script>
 <link rel="canonical" href="${esc(canonical)}" />
 ${verify}
 <meta property="og:type" content="${ogType || "website"}" />
