@@ -90,7 +90,7 @@ api/
 assets/
   app.js         Client hydration: routing, timeline, detail, year pager, search,
                  hamburger nav. Vanilla, no framework.
-  styles.css     Dark monochrome theme, 6px radii, mobile rules.
+  styles.css     Liquid-glass theme (Literal design tokens), light default + dark toggle, mobile rules.
   og.svg         Static fallback OG image (referenced by /api/og on error).
 data/
   feed.json      Fallback snapshot (regenerate with `npm run seed`). Details

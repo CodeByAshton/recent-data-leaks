@@ -151,7 +151,7 @@ function renderList() {
   });
   app.appendChild(el("div", { class: "controls" }, search));
 
-  const sources = ["all", "breach", "news", ...FEED.sources];
+  const sources = ["all", "breach", "news", ...(FEED.sources || [])];
   const labels = { all: "All", breach: "Confirmed breaches", news: "News" };
   const chips = el("div", { class: "chips" });
   sources.forEach((s) => {
@@ -365,6 +365,25 @@ document.getElementById("refresh").addEventListener("click", async () => {
   updatedEl.textContent = "Refreshing…";
   try { await loadFeed(); setUpdated(); render(); } catch (_) { updatedEl.textContent = "Offline"; }
 });
+
+// Theme toggle: light <-> dark by toggling the `dark` class on <html>, persisted
+// to localStorage. The no-flash setup in the document <head> applies the saved
+// choice before first paint; this just handles clicks and keeps theme-color in sync.
+const themeToggle = document.getElementById("themeToggle");
+if (themeToggle) {
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const applyTheme = (dark) => {
+    document.documentElement.classList.toggle("dark", dark);
+    themeToggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    if (themeMeta) themeMeta.setAttribute("content", dark ? "#111111" : "#EDEEEF");
+  };
+  applyTheme(document.documentElement.classList.contains("dark"));
+  themeToggle.addEventListener("click", () => {
+    const dark = !document.documentElement.classList.contains("dark");
+    try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (_) {}
+    applyTheme(dark);
+  });
+}
 
 // Mobile hamburger: toggle the nav dropdown. Wired independently of the feed so
 // it works on every page, even server-rendered ones the client doesn't manage.
