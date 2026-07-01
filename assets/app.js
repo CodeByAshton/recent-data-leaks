@@ -9,6 +9,7 @@ const liveDot = document.getElementById("liveDot");
 
 let FEED = null;
 let filter = { source: "all", q: "" };
+const LITERAL = "https://literal.so"; // funnel target (keep in sync with render.js)
 // True once the user has navigated inside the SPA. On a direct load/reload the
 // server-rendered detail page is complete (full details, works for the whole
 // catalog), so we leave it untouched and only take over after in-app navigation.
@@ -49,6 +50,12 @@ function el(tag, attrs = {}, ...kids) {
     n.appendChild(typeof kid === "string" ? document.createTextNode(kid) : kid);
   }
   return n;
+}
+
+// Literal funnel button (mirrors render.js protectCTA so it survives hydration).
+function protectEl(place) {
+  return el("a", { class: "protect-cta" + (place ? " " + place : ""), href: LITERAL, target: "_blank", rel: "noopener" },
+    "Protect your data ", el("span", { "aria-hidden": "true" }, "→"));
 }
 
 function relTime(iso) {
@@ -136,6 +143,7 @@ function renderList() {
       el("span", { class: "count", text: String(FEED.count) }),
       " tracked incidents · newest first")
   );
+  hero.appendChild(el("div", { class: "hero-cta" }, protectEl()));
   // Prefer the full year list from the API (matches the server-rendered nav);
   // fall back to deriving from loaded items.
   const years = (FEED.years && FEED.years.length)
@@ -298,6 +306,12 @@ function renderDetail(key) {
     it.advice.forEach((a) => ul.appendChild(el("li", { text: a })));
     detail.appendChild(ul);
   }
+
+  detail.appendChild(el("div", { class: "protect-block" },
+    el("div", {},
+      el("b", { text: "Worried your data is exposed?" }),
+      el("span", { text: "Take back control of your personal data with Literal." })),
+    protectEl("on-block")));
 
   detail.appendChild(el("div", { class: "section-title", text: "Details" }));
   detail.appendChild(el("div", { class: "detail-desc", text: it.details || it.summary || "No description available." }));
