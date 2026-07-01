@@ -393,9 +393,11 @@ module.exports = async function handler(req, res) {
   if (id) {
     const it = feed.items.find((x) => x.slug === id || x.id === id);
     // Consolidate old hash-id links onto the canonical slug URL with a 301.
+    // Slugs are deterministic, so the redirect is stable — let the CDN keep it.
     if (it && id === it.id && it.slug && id !== it.slug) {
       res.statusCode = 301;
       res.setHeader("Location", `/breach/${it.slug}`);
+      res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
       return res.end();
     }
     if (!it) {
@@ -448,6 +450,10 @@ module.exports = async function handler(req, res) {
         title: `${it.title} — ${NAME}`,
         description: (it.summary || `${it.title}.${affected}`).slice(0, 300),
         canonical: `${SITE}/breach/${it.slug || it.id}`,
+        // News pages are ephemeral (they 404 once the story leaves the source
+        // RSS windows), so don't let search engines index soon-to-die URLs;
+        // confirmed breach pages are permanent and stay indexable.
+        robots: it.sourceType === "news" ? "noindex, follow" : undefined,
         ogType: "article",
         image: `${SITE}/api/og?id=${encodeURIComponent(it.slug || it.id)}`,
         publishedTime: it.published || undefined,

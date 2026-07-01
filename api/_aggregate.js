@@ -3,6 +3,8 @@
 // seed script. Dependency-free: Node 18+ global fetch + hand-rolled RSS parsing.
 
 const { createHash } = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
 const { slugify } = require("./_content");
 
 const UA = "breach-feed (personal-project)";
@@ -316,6 +318,23 @@ async function aggregate() {
     ),
   ];
   await Promise.all(jobs);
+
+  // The breach catalog is the site's backbone: if HIBP failed (or timed out)
+  // but a news source succeeded, the feed would otherwise look "successful"
+  // while ~1,000 breach pages and most of the sitemap silently 404 for the
+  // whole cache window. Backfill breaches from the bundled snapshot instead.
+  if (!collected.some((it) => it.sourceType === "breach")) {
+    try {
+      const snap = JSON.parse(
+        fs.readFileSync(path.join(process.cwd(), "data", "feed.json"), "utf8")
+      );
+      const breaches = (snap.items || []).filter((x) => x.sourceType === "breach");
+      if (breaches.length) {
+        collected.push(...breaches);
+        errors.push("HIBP: breach catalog served from bundled snapshot");
+      }
+    } catch (_) { /* no snapshot available; carry on with what we have */ }
+  }
 
   // Dedupe by id and by normalized url.
   const seen = new Set();
