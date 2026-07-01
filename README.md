@@ -105,7 +105,7 @@ vercel.json      Function config, cron, and all route rewrites.
 
 | URL | Handled by | Notes |
 |---|---|---|
-| `/` | render (home) | Timeline, 80 most recent; full catalog via archives |
+| `/` | render (home) | Timeline, 15 at a time ("View more" pages through the full catalog) |
 | `/breach/:slug` | render | Per-breach page; old hash ids 301 to slug |
 | `/year/:yyyy` | render | Year archive |
 | `/company/:slug` | render | "Has X had a data breach?" hub |

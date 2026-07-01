@@ -129,6 +129,10 @@ function go(key) {
 window.addEventListener("popstate", () => { navigated = true; render(); });
 
 // ---------- Views ----------
+// True after the first client re-render. Gates the entrance animations: the
+// hydration re-render replaces visually identical SSR content and must not
+// replay the page cascade or fade the cards a reader is already looking at.
+let hadFirstRender = false;
 function render() {
   if (!FEED) return;
   if (!isManagedRoute()) return; // leave server-rendered archive pages alone
@@ -141,18 +145,21 @@ function render() {
     // we actually have the item loaded.
     const it = FEED.items.find((x) => x.slug === id || x.id === id);
     if (!navigated || !it) return;
+    document.body.classList.add("hydrated"); // stop the SSR page cascade rules
     app.classList.add("read");
     app.innerHTML = "";
     renderDetail(id);
   } else {
+    document.body.classList.add("hydrated");
     app.classList.remove("read");
     app.innerHTML = "";
-    renderList();
+    renderList(!hadFirstRender);
   }
+  hadFirstRender = true;
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
 }
 
-function renderList() {
+function renderList(noAnim) {
   const hero = el("section", { class: "hero" },
     el("h1", { text: "A live timeline of data breaches" }),
     el("p", {},
@@ -195,11 +202,13 @@ function renderList() {
 
   const listWrap = el("div", { id: "list" });
   app.appendChild(listWrap);
-  drawTimeline(listWrap);
+  shownCount = PAGE_SIZE;
+  drawTimeline(listWrap, noAnim ? Infinity : 0);
   setUpdated(); // fill the freshly-built hero status
 }
 
 function refreshList() {
+  shownCount = PAGE_SIZE; // new search/filter context starts from page one
   const listWrap = document.getElementById("list");
   if (listWrap) drawTimeline(listWrap);
 }
@@ -214,12 +223,20 @@ function buildYearNav(years) {
   const prev = el("button", { class: "yn-btn", type: "button", "aria-label": "Previous years" }, "‹");
   const win = el("span", { class: "yn-window" });
   const next = el("button", { class: "yn-btn", type: "button", "aria-label": "Next years" }, "›");
+  let firstDraw = true; // the initial window matches the SSR paint; only paging animates
   function draw() {
     win.innerHTML = "";
-    years.slice(offset, offset + page).forEach((y) =>
-      win.appendChild(el("a", { href: `/year/${y}` }, String(y))));
+    years.slice(offset, offset + page).forEach((y, i) => {
+      const a = el("a", { href: `/year/${y}` }, String(y));
+      if (!firstDraw) {
+        a.classList.add("enter");
+        a.style.animationDelay = `${i * 20}ms`;
+      }
+      win.appendChild(a);
+    });
     prev.disabled = offset <= 0;
     next.disabled = offset + page >= years.length;
+    firstDraw = false;
   }
   prev.addEventListener("click", () => { offset = Math.max(0, offset - page); draw(); });
   next.addEventListener("click", () => { offset = Math.min(Math.max(0, years.length - page), offset + page); draw(); });
@@ -227,25 +244,28 @@ function buildYearNav(years) {
   return el("nav", { class: "yearnav", "aria-label": "Browse by year" }, label, prev, win, next);
 }
 
-const HOME_LIMIT = 80;
-function drawTimeline(container) {
+// Progressive paging: PAGE_SIZE entries at a time, "View more" reveals the
+// next page until the whole (filtered) catalog is on the page. shownCount
+// resets whenever the list context changes (navigation, search, chips).
+const PAGE_SIZE = 15;
+let shownCount = PAGE_SIZE;
+// animFrom: index of the first card that should play the entrance animation.
+// 0 animates everything (new search/filter context), a previous shownCount
+// animates only the newly revealed page, Infinity animates nothing (hydration,
+// background auto-refresh).
+function drawTimeline(container, animFrom = 0) {
   container.innerHTML = "";
   const all = visibleItems();
   if (!all.length) {
     container.appendChild(el("div", { class: "empty", text: "No incidents match your filters." }));
     return;
   }
-  // Cap the home view; show matches once the user filters or searches — but
-  // still bounded, since filters now run over the full catalog and rendering
-  // 1,000+ cards at once would jank.
-  const FILTER_LIMIT = 200;
-  const hasFilter = filter.q.trim() || filter.source !== "all";
-  const items = hasFilter ? all.slice(0, FILTER_LIMIT) : all.slice(0, HOME_LIMIT);
+  const items = all.slice(0, shownCount);
 
   const tl = el("div", { class: "timeline" });
   let currentDay = null;
   let dayWrap = null;
-  for (const it of items) {
+  items.forEach((it, i) => {
     const key = dayKey(it.published);
     if (key !== currentDay) {
       currentDay = key;
@@ -253,19 +273,25 @@ function drawTimeline(container) {
       dayWrap = el("div", { class: "day-items" });
       tl.appendChild(dayWrap);
     }
-    dayWrap.appendChild(cardFor(it));
+    const card = cardFor(it);
+    if (i >= animFrom) {
+      card.classList.add("enter");
+      card.style.animationDelay = `${Math.min(i - animFrom, 14) * 24}ms`;
+    }
+    dayWrap.appendChild(card);
+  });
+  if (all.length > items.length) {
+    tl.appendChild(el("div", { class: "view-more-wrap" },
+      el("button", {
+        class: "ghost-btn view-more", type: "button",
+        onclick: () => {
+          const from = shownCount;
+          shownCount += PAGE_SIZE;
+          drawTimeline(container, from);
+        },
+      }, `View more (${all.length - items.length} remaining)`)));
   }
   container.appendChild(tl);
-
-  if (!hasFilter && FEED.count > HOME_LIMIT) {
-    container.appendChild(el("p", { class: "more-note" },
-      `Showing the ${HOME_LIMIT} most recent of ${FEED.count} tracked incidents. `,
-      el("a", { href: "/stats" }, "See statistics"),
-      " or browse by year above."));
-  } else if (hasFilter && all.length > FILTER_LIMIT) {
-    container.appendChild(el("p", { class: "more-note" },
-      `Showing the first ${FILTER_LIMIT} of ${all.length} matches. Refine your search to narrow them down.`));
-  }
 }
 
 function cardFor(it) {
@@ -313,7 +339,9 @@ function renderDetail(key) {
   if (it.affected) meta.appendChild(el("span", { class: "pill danger" }, el("b", { text: fmtNum(it.affected) }), " accounts"));
   if (it.domain) meta.appendChild(el("span", { class: "pill" }, el("b", { text: it.domain })));
 
-  const detail = el("div", { class: "detail" }, el("h1", { text: it.title }), meta);
+  // .enter plays the entrance animation — renderDetail only runs on SPA
+  // navigation (direct loads keep the SSR page), so this is always user-driven.
+  const detail = el("div", { class: "detail enter" }, el("h1", { text: it.title }), meta);
 
   if (it.tags && it.tags.length) {
     detail.appendChild(el("div", { class: "section-title", text: "What was exposed" }));
@@ -438,6 +466,11 @@ if (themeToggle) {
   applyTheme(document.documentElement.classList.contains("dark"));
   themeToggle.addEventListener("click", () => {
     const dark = !document.documentElement.classList.contains("dark");
+    // Cross-fade the whole page between themes (skipped under reduced motion).
+    if (!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      document.documentElement.classList.add("theme-anim");
+      setTimeout(() => document.documentElement.classList.remove("theme-anim"), 350);
+    }
     try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (_) {}
     applyTheme(dark);
   });
@@ -460,9 +493,17 @@ if (navToggle && topNav) {
   );
 }
 
-// Auto-refresh data every 5 minutes while the tab is open.
+// Auto-refresh data every 5 minutes while the tab is open. Redraw in place
+// without resetting shownCount, so a reader deep in the list isn't yanked
+// back to the first page.
 setInterval(async () => {
-  try { await loadFeed(); setUpdated(); if (!routeId()) refreshList(); } catch (_) {}
+  try {
+    await loadFeed(); setUpdated();
+    if (!routeId()) {
+      const listWrap = document.getElementById("list");
+      if (listWrap) drawTimeline(listWrap, Infinity); // silent background redraw
+    }
+  } catch (_) {}
 }, 5 * 60 * 1000);
 
 boot();

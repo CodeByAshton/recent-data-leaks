@@ -123,11 +123,14 @@ function controlsHTML(feed) {
   return `<div class="controls"><input class="search" type="search" placeholder="Search breaches, companies, sources&hellip;" aria-label="Search breaches" value="" /></div><div class="chips">${chips}</div>`;
 }
 
-const HOME_LIMIT = 80;
+// First page of the timeline; the hydrated client reveals the rest 15 at a
+// time via its "View more" button (see PAGE_SIZE in app.js). This static note
+// is the no-JS / crawler fallback and is replaced on hydration.
+const HOME_LIMIT = 15;
 function homeMain(feed) {
   const recent = feed.items.slice(0, HOME_LIMIT);
   const more = feed.count > HOME_LIMIT
-    ? `<p class="more-note">Showing the ${HOME_LIMIT} most recent of ${feed.count} tracked incidents. <a href="/stats">See statistics</a> or browse by year above.</p>`
+    ? `<p class="more-note">Showing the ${HOME_LIMIT} most recent of ${feed.count} tracked incidents. Browse by year above or <a href="/stats">see statistics</a>.</p>`
     : "";
   // The hero carries the message + CTA + live status; all the browse controls
   // (search, filter chips, year nav) cluster together below it.
@@ -634,7 +637,7 @@ module.exports = async function handler(req, res) {
         },
         {
           "@type": "ItemList",
-          itemListElement: feed.items.slice(0, 25).map((it, i) => ({
+          itemListElement: feed.items.slice(0, HOME_LIMIT).map((it, i) => ({
             "@type": "ListItem", position: i + 1, url: `${SITE}/breach/${it.slug || it.id}`, name: it.title,
           })),
         },

@@ -149,17 +149,54 @@
 
 * { box-sizing: border-box; }
 
+/* ---------- Motion ----------
+   One entrance keyframe used everywhere, tuned to the Literal interaction
+   spec's short-and-settled feel. */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Initial page cascade on the server-rendered paint. The client adds
+   .hydrated to <body> before its first re-render so the cascade never
+   replays when content is rebuilt. */
+body:not(.hydrated) main > * { animation: fadeUp 0.32s ease both; }
+body:not(.hydrated) main > *:nth-child(2) { animation-delay: 0.05s; }
+body:not(.hydrated) main > *:nth-child(3) { animation-delay: 0.10s; }
+body:not(.hydrated) main > *:nth-child(4) { animation-delay: 0.15s; }
+body:not(.hydrated) main > *:nth-child(n+5) { animation-delay: 0.20s; }
+/* Elements the client adds in response to an interaction (View more pages,
+   SPA-navigated detail views, year-nav paging) rise in; app.js staggers the
+   cards via animation-delay. */
+.card.enter, .detail.enter { animation: fadeUp 0.28s ease both; }
+.yn-window a.enter { animation: fadeUp 0.2s ease both; }
+/* Mobile nav dropdown slides open. */
+.topnav.open { animation: navDrop 0.22s ease; }
+@keyframes navDrop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Brief whole-page cross-fade when the theme flips; the class is added and
+   removed by app.js (and skipped entirely under reduced motion). */
+.theme-anim, .theme-anim *, .theme-anim *::before, .theme-anim *::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+              color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease !important;
+}
+
 /* The Literal interaction spec animates transforms and shadows throughout;
-   honor users who ask for less motion. */
+   honor users who ask for less motion. (Kept after the motion rules above so
+   its !important durations win.) */
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after {
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
   }
 }
 
-html { background: var(--bg-app); }
+html { background: var(--bg-app); scroll-behavior: smooth; }
 html, body {
   margin: 0; padding: 0;
   color: var(--text-primary);
@@ -419,7 +456,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .faq-q { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text-primary); margin: 0 0 6px; }
 .faq-a { margin: 0; color: var(--text-secondary); font-size: 14.5px; line-height: 1.6; }
 
-/* Home "showing recent" note */
+/* "View more" pager at the end of the timeline */
+.view-more-wrap { display: flex; justify-content: center; padding: 28px 0 6px; }
+.view-more { font-size: 13.5px; padding: 10px 22px; }
+
+/* Home "showing recent" note (SSR / no-JS fallback) */
 .more-note { margin: 24px 0 50px; color: var(--text-secondary); font-size: 14px; }
 .more-note a { color: var(--text-primary); border-bottom: 1px solid var(--border-standard); }
 .more-note a:hover { border-bottom-color: var(--accent); }
