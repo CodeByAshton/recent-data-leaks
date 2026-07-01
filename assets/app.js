@@ -213,11 +213,17 @@ function refreshList() {
   if (listWrap) drawTimeline(listWrap);
 }
 
-// Paged year nav: shows a window of years with prev/next buttons instead of
-// listing all of them (which wrapped and broke the mobile layout).
+// Year nav. Mobile: every year in one scrollable row, matching the chips.
+// Desktop: a windowed pager with prev/next buttons.
 function buildYearNav(years) {
   const mq = (q) => window.matchMedia && window.matchMedia(q).matches;
-  const page = mq("(max-width: 400px)") ? 3 : mq("(max-width: 640px)") ? 4 : 7;
+  if (mq("(max-width: 640px)")) {
+    const win = el("span", { class: "yn-window" });
+    years.forEach((y) => win.appendChild(el("a", { href: `/year/${y}` }, String(y))));
+    return el("nav", { class: "yearnav", "aria-label": "Browse by year" },
+      el("span", { class: "yn-label", text: "Browse by year:" }), win);
+  }
+  const page = 7;
   let offset = 0;
   const label = el("span", { class: "yn-label", text: "Browse by year:" });
   const prev = el("button", { class: "yn-btn", type: "button", "aria-label": "Previous years" }, "‹");
@@ -474,6 +480,15 @@ if (themeToggle) {
     try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (_) {}
     applyTheme(dark);
   });
+}
+
+// Scroll feedback: the topbar lifts (stronger shadow) once the page is
+// scrolled. Wired on every page; passive listener, cheap class toggle.
+const topbar = document.querySelector(".topbar");
+if (topbar) {
+  const onScroll = () => topbar.classList.toggle("scrolled", window.scrollY > 4);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
 }
 
 // Mobile hamburger: toggle the nav dropdown. Wired independently of the feed so
