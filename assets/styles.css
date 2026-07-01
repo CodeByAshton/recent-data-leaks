@@ -466,6 +466,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .protect-cta:hover span { transform: translateX(3px); }
 .hero-cta { margin: 20px 0 0; }
 
+/* Hero action row: primary CTA on the left, live status + Refresh on the right. */
+.hero-actions { display: flex; align-items: center; justify-content: space-between; gap: 14px 20px; margin: 22px 0 0; flex-wrap: wrap; }
+.feed-status { display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 13px; }
+.feed-status #updated { min-width: auto; text-align: left; font-variant-numeric: tabular-nums; }
+
 /* Contextual funnel block on breach pages */
 .protect-block {
   display: flex; align-items: center; justify-content: space-between; gap: 18px;
@@ -486,7 +491,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   .topbar .wrap { gap: 10px; height: auto; min-height: 64px; padding-top: 10px; padding-bottom: 10px; }
   .navtoggle { display: flex; flex: none; }
   .status { margin-left: auto; flex: none; gap: 8px; }
-  .status .dot, #updated { display: none; }
 
   .topnav {
     display: none; position: absolute; top: 100%; left: 0; right: 0;

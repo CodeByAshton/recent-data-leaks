@@ -4,8 +4,6 @@
 // it leaves the server-rendered content in place.
 
 const app = document.getElementById("app");
-const updatedEl = document.getElementById("updated");
-const liveDot = document.getElementById("liveDot");
 
 let FEED = null;
 let filter = { source: "all", q: "" };
@@ -145,7 +143,11 @@ function renderList() {
       el("span", { class: "count", text: String(FEED.count) }),
       " tracked incidents · newest first")
   );
-  hero.appendChild(el("div", { class: "hero-cta" }, protectEl()));
+  const status = el("div", { class: "feed-status" },
+    el("span", { class: "dot live", id: "liveDot", "aria-hidden": "true" }),
+    el("span", { id: "updated", text: "Live" }),
+    el("button", { id: "refresh", class: "ghost-btn", type: "button", "aria-label": "Refresh the feed" }, "Refresh"));
+  hero.appendChild(el("div", { class: "hero-actions" }, protectEl(), status));
   // Prefer the full year list from the API (matches the server-rendered nav);
   // fall back to deriving from loaded items.
   const years = (FEED.years && FEED.years.length)
@@ -176,6 +178,7 @@ function renderList() {
   const listWrap = el("div", { id: "list" });
   app.appendChild(listWrap);
   drawTimeline(listWrap);
+  setUpdated(); // fill the freshly-built hero status
 }
 
 function refreshList() {
@@ -347,10 +350,14 @@ function renderDetail(key) {
 }
 
 // ---------- Boot ----------
+// The status now lives in the (re-rendered) hero, so re-query each call and
+// no-op on pages that don't have it.
 function setUpdated() {
   if (!FEED) return;
-  updatedEl.textContent = "Updated " + relTime(FEED.generatedAt);
-  liveDot.classList.toggle("live", !!FEED._live);
+  const u = document.getElementById("updated");
+  const dot = document.getElementById("liveDot");
+  if (u) u.textContent = "Updated " + relTime(FEED.generatedAt);
+  if (dot) dot.classList.toggle("live", !!FEED._live);
 }
 
 async function boot() {
@@ -364,14 +371,20 @@ async function boot() {
   } catch (e) {
     // Leave the server-rendered content in place; just flag that live data
     // (filters, search, refresh) isn't available right now.
-    updatedEl.textContent = "Offline";
-    liveDot.classList.remove("live");
+    const u = document.getElementById("updated"); if (u) u.textContent = "Offline";
+    const dot = document.getElementById("liveDot"); if (dot) dot.classList.remove("live");
   }
 }
 
-document.getElementById("refresh").addEventListener("click", async () => {
-  updatedEl.textContent = "Refreshing…";
-  try { await loadFeed(); setUpdated(); render(); } catch (_) { updatedEl.textContent = "Offline"; }
+// Refresh lives in the hero (re-rendered), so delegate the click so it works for
+// both the server-rendered button and any client re-render.
+async function doRefresh() {
+  const u = document.getElementById("updated"); if (u) u.textContent = "Refreshing…";
+  try { await loadFeed(); setUpdated(); render(); }
+  catch (_) { const u2 = document.getElementById("updated"); if (u2) u2.textContent = "Offline"; }
+}
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.closest && e.target.closest("#refresh")) { e.preventDefault(); doRefresh(); }
 });
 
 // Theme toggle: light <-> dark by toggling the `dark` class on <html>, persisted
