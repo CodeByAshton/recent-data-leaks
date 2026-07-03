@@ -274,12 +274,13 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   color: var(--text-primary);
 }
 .byline {
-  display: inline-flex; align-items: center; gap: 4px; width: fit-content;
+  display: inline-flex; align-items: center; gap: 5px; width: fit-content;
   font-size: 11px; color: var(--text-tertiary); letter-spacing: .1px; transition: color 140ms ease;
 }
-.byline img { display: block; }
-.byline span { font-weight: 600; color: var(--text-secondary); }
-.byline:hover span { color: var(--text-primary); }
+/* The inlined Literal logo inherits currentColor, so it themes itself;
+   height matches the old 11px text lockup. */
+.byline-logo { display: block; height: 11px; width: auto; color: var(--text-secondary); transition: color 140ms ease; }
+.byline:hover .byline-logo { color: var(--text-primary); }
 .topnav { flex: 1; display: flex; justify-content: center; gap: 34px; }
 .topnav a {
   position: relative; font-size: 14px; color: var(--text-secondary); padding: 6px 1px;
